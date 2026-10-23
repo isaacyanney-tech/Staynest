@@ -5,7 +5,7 @@ import { z } from "zod";
 // with them, so a malformed row renders nothing rather than breaking a page.
 
 const text = (max: number) => z.string().trim().max(max);
-const required = (max: number) => z.string().trim().min(1, "Required").max(max);
+const required = (max: number) => z.string().trim().min(1, "Fill this in.").max(max);
 
 export const safeHref = z
   .string()

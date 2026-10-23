@@ -1127,6 +1127,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_users: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_role?: Database["public"]["Enums"]["app_role"]
+          p_search?: string
+        }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_suspended: boolean
+          phone: string
+          role: Database["public"]["Enums"]["app_role"]
+          total: number
+        }[]
+      }
       current_app_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]

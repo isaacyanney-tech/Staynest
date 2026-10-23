@@ -332,6 +332,25 @@ select tests.is('restore copies the revision into the draft',
     where section_id = (select id from public.page_sections where key = 'hero')), 'New heading');
 select tests.is('admin sees revisions', (select count(*) from public.content_revisions)::int >= 2, true);
 
+-- Site chrome and media: anyone reads what is live, only admins write.
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+select tests.throws('owner cannot add a menu link',
+  $$insert into public.navigation_items (location, label, href) values ('header', 'Win', '/x')$$);
+select tests.throws('owner cannot add a banner',
+  $$insert into public.promo_banners (message, is_active) values ('Free rooms', true)$$);
+select tests.throws('owner cannot add a site image',
+  $$insert into public.media_assets (external_url, alt_text) values ('https://example.com/a.jpg', 'x')$$);
+select tests.throws('owner cannot upload to the site folder',
+  $$insert into storage.objects (bucket_id, name) values ('public-media', 'site/x.webp')$$);
+select tests.act_as('00000000-0000-0000-0000-00000000000a');
+insert into public.promo_banners (message, is_active, starts_at) values ('Later', true, now() + interval '1 day');
+insert into public.navigation_items (location, label, href, is_visible) values ('header', 'Hidden link', '/hidden', false);
+select tests.throws('menu links reject script URLs',
+  $$insert into public.navigation_items (location, label, href) values ('header', 'x', 'javascript:alert(1)')$$);
+select tests.act_as(null);
+select tests.is('a scheduled banner is not shown yet', (select count(*) from public.promo_banners where message = 'Later')::int, 0);
+select tests.is('a hidden menu link is not shown', (select count(*) from public.navigation_items where label = 'Hidden link')::int, 0);
+
 -- ---------------------------------------------------------------- billing
 select tests.act_as('00000000-0000-0000-0000-0000000000a1');
 select tests.throws('owner cannot record a payment',
@@ -352,5 +371,19 @@ update public.plans set price_amount = 450 where code = 'premium';
 select tests.reset_role();
 select tests.is('admin plan change is audited',
   (select count(*) from public.audit_log where entity = 'plans')::int >= 1, true);
+
+-- ---------------------------------------------------------------- admin user list
+select tests.act_as('00000000-0000-0000-0000-00000000000a');
+select tests.is('admin lists accounts with emails',
+  (select count(*) from public.admin_list_users(null, null, 50, 0) where email like '%@test')::int >= 3, true);
+select tests.is('admin search matches email or name',
+  (select count(*) from public.admin_list_users('ADMIN@', null, 50, 0))::int, 1);
+select tests.is('admin filters by role',
+  (select bool_and(role = 'owner') from public.admin_list_users(null, 'owner', 50, 0)), true);
+select tests.act_as('00000000-0000-0000-0000-0000000000b1');
+select tests.throws('student cannot list accounts', $$select * from public.admin_list_users()$$, '42501');
+select tests.act_as(null);
+select tests.throws('anonymous cannot list accounts', $$select * from public.admin_list_users()$$);
+select tests.reset_role();
 
 \echo 'All policy tests passed'

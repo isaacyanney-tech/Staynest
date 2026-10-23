@@ -10,7 +10,7 @@ StayNest helps students find hostels near Ghanaian universities. Students search
 | --- | --- | --- |
 | 1 | Database, permissions, homepage, search, hostel pages, inspection requests, content pages, pricing, sign-in and sign-up, first dashboards | Done |
 | 2 | Owner listing editor: hostels, rooms and prices, photo uploads, verification documents, replies to inspection requests | This branch |
-| 3 | Admin console: moderation, verification review, CMS editor with draft, preview, publish and revert, media, site settings, plans | Planned |
+| 3 | Admin console: moderation, verification review, CMS editor with draft, preview, publish and revert, media, site settings, plans | Done |
 | 4 | Paystack subscriptions and featured placements, verified on the server and by webhook | Planned |
 
 ## Getting started
@@ -44,7 +44,7 @@ Migrations live in `supabase/migrations` and are applied in filename order. Ever
 
 - Apply with the Supabase CLI (`supabase db push`) or paste each file into the SQL editor, in order.
 - `supabase/seed/demo_listings.sql` adds six **illustrative** listings. They are marked `is_demo`, labelled "Illustrative" everywhere, cannot be inspected, and use free Unsplash License photos. Remove them with `delete from public.hostels where is_demo;`.
-- Starting plan prices (GHS 0, 150, 400 per month) and the featured placement price are placeholders. Change them in the `plans` and `business_settings` tables (an admin screen arrives in Stage 3).
+- Starting plan prices (GHS 0, 150, 400 per month) and the featured placement price are placeholders. Change them under Plans and prices and Business settings in the admin console.
 - The terms and privacy pages are starting templates and need legal review before launch.
 
 ## First administrator
@@ -56,6 +56,18 @@ NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run admin:bootstr
 ```
 
 If the email has no account, one is created with a random password that is printed once; change it straight away. The script refuses to run when an admin already exists unless you pass `--force`. Admins sign in at `/admin/login`.
+
+## Admin console
+
+Everything lives under `/admin` and needs an administrator account. Each action is checked again by row-level security, and moderation, access, price, setting and publishing changes are written to the activity log.
+
+- **Listings**: approve submitted listings, send them back with a note the owner sees, or suspend a live one.
+- **Verification**: open the owner's documents through links that expire after 10 minutes, then approve, ask for more or reject. Approving adds the verified badge.
+- **People**: change an account's role or suspend it. You cannot change your own access.
+- **Plans and prices**, **Business settings**: values the site reads at run time. Existing subscriptions keep the price they were sold at.
+- **Pages and content**: every editable section of the homepage, content pages and footer. Edits are saved as drafts, can be previewed at `/admin/preview/<page>`, and only go live on **Save and publish**. Each publish keeps a version you can restore. Sections can be hidden or reordered, and pages have their own search title and description.
+- **Media library**: images for site pages. Uploads need a description and a confirmation that the image may be used, can be labelled illustrative, and are re-encoded to WebP. An image still used by a page cannot be deleted.
+- **Site and navigation**: name, logo, colours (from a set that keeps text readable), contact details, social links, search defaults, header and footer links, and a scheduled announcement banner.
 
 ## Deploying to Netlify
 

@@ -23,3 +23,30 @@ values ('e2e10000-0000-4000-8000-000000000001', 'Two in a room', 2, 5800, 'acade
 update public.profiles set phone = '+233 24 555 0101' where id = 'e2e00000-0000-4000-8000-000000000005';
 insert into public.inspection_requests (hostel_id, student_id, preferred_date, preferred_time, message)
 values ('e2e10000-0000-4000-8000-000000000001', 'e2e00000-0000-4000-8000-000000000005', current_date + 3, 'morning', 'Can I see a room with a balcony?');
+
+-- Work waiting for an administrator: two submitted listings and a
+-- verification request with one document.
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('e2e00000-0000-4000-8000-000000000006', 'review.owner@e2e.test', '{"full_name":"Abena Boateng","role":"owner"}');
+update public.profiles set phone = '+233 27 555 0202' where id = 'e2e00000-0000-4000-8000-000000000006';
+
+insert into public.hostels (id, slug, name, summary, description, owner_id, university_id, address, area, city, distance_km,
+                            gender_policy, amenities, house_rules, status)
+select v.id::uuid, v.slug, v.name, v.summary, 'Rooms around a shaded courtyard.', 'e2e00000-0000-4000-8000-000000000006', u.id,
+       '4 Review Road', v.area, 'Kumasi', 1.2, 'mixed', array['wifi', 'security'], '', 'pending_review'
+from public.universities u,
+     (values ('e2e10000-0000-4000-8000-000000000002', 'kotei-review-lodge', 'Kotei Review Lodge', 'Quiet rooms ten minutes from campus.', 'Kotei'),
+             ('e2e10000-0000-4000-8000-000000000003', 'bomso-review-hostel', 'Bomso Review Hostel', '', 'Bomso')) as v(id, slug, name, summary, area)
+where u.slug = 'knust';
+
+insert into public.room_types (hostel_id, name, occupancy, price_amount, price_period, total_rooms, available_rooms, sort_order)
+values ('e2e10000-0000-4000-8000-000000000002', 'Single room', 1, 7200, 'academic_year', 6, 6, 1);
+
+insert into public.verification_applications (id, hostel_id, owner_id, owner_note)
+values ('e2e20000-0000-4000-8000-000000000001', 'e2e10000-0000-4000-8000-000000000002', 'e2e00000-0000-4000-8000-000000000006',
+        'Land title is in my name.');
+insert into storage.objects (bucket_id, name, owner)
+values ('verification-docs', 'e2e00000-0000-4000-8000-000000000006/e2e20000-0000-4000-8000-000000000001/title.pdf', 'e2e00000-0000-4000-8000-000000000006');
+insert into public.verification_documents (application_id, storage_path, doc_type, file_name)
+values ('e2e20000-0000-4000-8000-000000000001', 'e2e00000-0000-4000-8000-000000000006/e2e20000-0000-4000-8000-000000000001/title.pdf',
+        'ownership', 'land-title.pdf');

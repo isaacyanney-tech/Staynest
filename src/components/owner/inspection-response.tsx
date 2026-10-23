@@ -1,7 +1,8 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { respondToInspection } from "@/lib/actions/owner";
 import { idle } from "@/lib/forms";
+import { useChoice } from "@/lib/use-choice";
 import { Field, Input, Textarea } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -29,7 +30,7 @@ const OPTIONS: Record<string, { value: Decision; label: string }[]> = {
 export function InspectionResponse({ id, status, today }: { id: string; status: string; today: string }) {
   const options = OPTIONS[status] ?? [];
   const [state, action] = useActionState(respondToInspection, idle);
-  const [decision, setDecision] = useState<Decision>(options[0]?.value ?? "accepted");
+  const [decision, setDecision] = useChoice<Decision>(state, "decision", options[0]?.value ?? "accepted");
   const err = state.fieldErrors ?? {};
   const sent = state.status === "error" ? state.values : undefined;
   const prefix = `insp-${id}-`;
@@ -52,7 +53,7 @@ export function InspectionResponse({ id, status, today }: { id: string; status: 
                 type="radio"
                 name="decision"
                 value={o.value}
-                checked={decision === o.value}
+                defaultChecked={decision === o.value}
                 onChange={() => setDecision(o.value)}
                 className="accent-[var(--brand-primary)]"
               />

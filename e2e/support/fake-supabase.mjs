@@ -148,6 +148,35 @@ async function storage(req, res, url) {
     return res.end(readFileSync(file));
   }
 
+  // Signed links to private files: the caller must be able to read the object
+  // under storage RLS, and the link carries a short-lived token for that path.
+  const signMany = path.match(/^\/object\/sign\/([\w-]+)$/);
+  if (signMany && req.method === "POST") {
+    const [, bucket] = signMany;
+    const { paths = [], expiresIn = 60 } = JSON.parse((await readRaw(req)).toString() || "{}");
+    if (!claims) return send(res, 400, { statusCode: "403", error: "Unauthorized", message: "Missing or invalid token" });
+    const exp = Math.floor(Date.now() / 1000) + Number(expiresIn);
+    return send(
+      res,
+      200,
+      paths.map((name) => {
+        const visible = sqlAs(claims, `select count(*) from storage.objects where bucket_id = :'p1' and name = :'p2';`, bucket, name).endsWith("1");
+        return visible
+          ? { path: name, error: null, signedURL: `/object/sign/${bucket}/${name}?token=${sign({ url: `${bucket}/${name}`, exp })}` }
+          : { path: name, error: "Either the object does not exist or you do not have access to it", signedURL: null };
+      }),
+    );
+  }
+  const signed = path.match(/^\/object\/sign\/([\w-]+)\/(.+)$/);
+  if (signed && req.method === "GET") {
+    const [, bucket, name] = signed;
+    const token = verify(url.searchParams.get("token"));
+    const file = token?.url === `${bucket}/${name}` ? filePath(bucket, name) : null;
+    if (!file || !existsSync(file)) return send(res, 400, { statusCode: "400", error: "InvalidJWT", message: "Invalid or expired link" });
+    res.writeHead(200, { "content-type": readFileSync(`${file}.type`, "utf8"), "cache-control": "private, no-store" });
+    return res.end(readFileSync(file));
+  }
+
   const upload = path.match(/^\/object\/([\w-]+)\/(.+)$/);
   if (upload && req.method === "POST") {
     const [, bucket, name] = upload;

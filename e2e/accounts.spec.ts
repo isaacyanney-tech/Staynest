@@ -38,6 +38,21 @@ test.describe("accounts and roles", () => {
     await expect(page.getByText("Check new.student@e2e.test for a link to confirm your account.")).toBeVisible();
   });
 
+  test("the chosen account type survives a form error", async ({ page }) => {
+    await page.goto("/sign-up");
+    await page.getByText("I own a hostel").click();
+    await expect(page.getByRole("radio", { name: /I own a hostel/ })).toBeChecked();
+    await page.getByLabel("Full name").fill("Efua Owner");
+    await page.getByLabel("Email").fill("efua.owner@e2e.test");
+    await page.getByLabel("Password", { exact: true }).fill("short");
+    await page.getByRole("checkbox").check();
+    await page.getByRole("button", { name: "Create account" }).click();
+    await expect(page.getByText("Use at least 10 characters.")).toBeVisible();
+    // React resets the form after a submission; the radio must not fall back to "student".
+    await expect(page.getByRole("radio", { name: /I own a hostel/ })).toBeChecked();
+    await expect(page.getByRole("radio", { name: /I am a student/ })).not.toBeChecked();
+  });
+
   test("student requests an inspection, sees it in the dashboard and cancels it", async ({ page }) => {
     await signIn(page, users.student, "/sign-in?next=/hostels/okponglo-test-house");
     await expect(page).toHaveURL(/^[^?]+\/hostels\/okponglo-test-house$/);

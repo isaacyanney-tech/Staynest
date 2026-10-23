@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { cacheLife } from "next/cache";
 import { findSection, getNavigation, getPage, getSiteSettings } from "@/lib/cms/queries";
+import type { SectionContent } from "@/lib/cms/schemas";
 import { Wordmark } from "./logo";
 
-export async function SiteFooter() {
+/** `preview` replaces the published footer text, for the admin preview. */
+export async function SiteFooter({ preview }: { preview?: SectionContent<"footer"> | null } = {}) {
   const [nav, settings, global] = await Promise.all([getNavigation(), getSiteSettings(), getPage("global")]);
-  const footer = global ? findSection(global.sections, "footer") : null;
+  const footer = preview !== undefined ? preview : global ? findSection(global.sections, "footer") : null;
   const groups = new Map<string, typeof nav.footer>();
   for (const item of nav.footer) {
     const key = item.group_label ?? "";
