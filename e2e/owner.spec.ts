@@ -43,6 +43,7 @@ test.describe("owner listing editor", () => {
     await request.getByRole("radio", { name: "Decline" }).check();
     await request.getByRole("button", { name: "Send reply" }).click();
     await expect(request.getByText("Tell the student why, so they can look elsewhere.")).toBeVisible();
+    await expect(request.getByRole("radio", { name: "Decline" })).toBeChecked();
 
     await request.getByRole("radio", { name: "Accept this date" }).check();
     await request.getByLabel(/Message to the student/).fill("Meet me at the gate at 10.");

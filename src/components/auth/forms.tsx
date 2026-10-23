@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { GraduationCap, KeyRound } from "lucide-react";
 import { adminSignIn, requestPasswordReset, resetPassword, signIn, signUp } from "@/lib/actions/auth";
 import { idle, type FormState } from "@/lib/forms";
+import { useChoice } from "@/lib/use-choice";
 import { cn } from "@/lib/cn";
 import { Checkbox, Field, Input } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
@@ -53,7 +54,7 @@ export function AdminSignInForm({ next }: { next?: string }) {
 
 export function SignUpForm({ next, initialRole }: { next?: string; initialRole: "student" | "owner" }) {
   const [state, formAction] = useActionState(signUp, idle);
-  const [role, setRole] = useState<"student" | "owner">((state.values?.role as "student" | "owner") ?? initialRole);
+  const [role, setRole] = useChoice<"student" | "owner">(state, "role", initialRole);
   const err = state.fieldErrors ?? {};
   const v = state.values ?? {};
 
@@ -86,7 +87,7 @@ export function SignUpForm({ next, initialRole }: { next?: string; initialRole: 
                 role === o.value ? "border-primary bg-primary-soft/60" : "border-line-strong hover:border-muted",
               )}
             >
-              <input type="radio" name="role" value={o.value} checked={role === o.value} onChange={() => setRole(o.value)} className="sr-only" />
+              <input type="radio" name="role" value={o.value} defaultChecked={role === o.value} onChange={() => setRole(o.value)} className="sr-only" />
               <o.icon className={cn("size-5", role === o.value ? "text-primary" : "text-muted")} aria-hidden />
               <span className="text-sm font-semibold">{o.label}</span>
               <span className="text-xs leading-snug text-muted">{o.body}</span>

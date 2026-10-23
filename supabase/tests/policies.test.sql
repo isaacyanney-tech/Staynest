@@ -353,4 +353,18 @@ select tests.reset_role();
 select tests.is('admin plan change is audited',
   (select count(*) from public.audit_log where entity = 'plans')::int >= 1, true);
 
+-- ---------------------------------------------------------------- admin user list
+select tests.act_as('00000000-0000-0000-0000-00000000000a');
+select tests.is('admin lists accounts with emails',
+  (select count(*) from public.admin_list_users(null, null, 50, 0) where email like '%@test')::int >= 3, true);
+select tests.is('admin search matches email or name',
+  (select count(*) from public.admin_list_users('ADMIN@', null, 50, 0))::int, 1);
+select tests.is('admin filters by role',
+  (select bool_and(role = 'owner') from public.admin_list_users(null, 'owner', 50, 0)), true);
+select tests.act_as('00000000-0000-0000-0000-0000000000b1');
+select tests.throws('student cannot list accounts', $$select * from public.admin_list_users()$$, '42501');
+select tests.act_as(null);
+select tests.throws('anonymous cannot list accounts', $$select * from public.admin_list_users()$$);
+select tests.reset_role();
+
 \echo 'All policy tests passed'
