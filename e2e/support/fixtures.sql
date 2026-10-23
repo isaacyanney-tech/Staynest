@@ -50,3 +50,16 @@ values ('verification-docs', 'e2e00000-0000-4000-8000-000000000006/e2e20000-0000
 insert into public.verification_documents (application_id, storage_path, doc_type, file_name)
 values ('e2e20000-0000-4000-8000-000000000001', 'e2e00000-0000-4000-8000-000000000006/e2e20000-0000-4000-8000-000000000001/title.pdf',
         'ownership', 'land-title.pdf');
+
+-- An owner with one published listing, for payment tests.
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('e2e00000-0000-4000-8000-000000000007', 'billing.owner@e2e.test', '{"full_name":"Efua Darko","role":"owner"}');
+insert into public.hostels (id, slug, name, summary, description, owner_id, university_id, address, area, city, distance_km,
+                            gender_policy, amenities, house_rules, status, is_verified, published_at, contact_phone)
+select 'e2e10000-0000-4000-8000-000000000004', 'ayeduase-billing-house', 'Ayeduase Billing House',
+       'A published listing used by payment tests.', 'Rooms close to the Ayeduase gate.',
+       'e2e00000-0000-4000-8000-000000000007', u.id, '4 Gate Road', 'Ayeduase', 'Kumasi', 1.1,
+       'mixed', array['wifi'], '', 'published', false, now(), '+233 20 000 0004'
+from public.universities u where u.slug = 'knust';
+insert into public.room_types (hostel_id, name, occupancy, price_amount, price_period, total_rooms, available_rooms, sort_order)
+values ('e2e10000-0000-4000-8000-000000000004', 'Single room', 1, 6400, 'academic_year', 6, 2, 1);

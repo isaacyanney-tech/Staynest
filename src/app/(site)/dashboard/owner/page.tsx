@@ -45,7 +45,7 @@ async function OwnerDashboard({ searchParams }: { searchParams: PageProps<"/dash
     <>
       <DashboardHeader viewer={viewer} title="Your hostels">
         {atLimit ? (
-          <LinkButton href="/pricing" variant="outline">
+          <LinkButton href="/dashboard/owner/billing" variant="outline">
             Upgrade to add more
           </LinkButton>
         ) : (
@@ -65,8 +65,8 @@ async function OwnerDashboard({ searchParams }: { searchParams: PageProps<"/dash
       <p className="mt-6 text-sm text-muted">
         {plan.name} plan: {plan.listingLimit === null ? `${used} listings, no limit` : `${used} of ${plan.listingLimit} listing${plan.listingLimit === 1 ? "" : "s"} used`},
         up to {plan.photoLimit} photos each.{" "}
-        <Link href="/pricing" className="font-medium text-primary underline-offset-2 hover:underline">
-          Compare plans
+        <Link href="/dashboard/owner/billing" className="font-medium text-primary underline-offset-2 hover:underline">
+          Plan, billing and featured placements
         </Link>
       </p>
 
