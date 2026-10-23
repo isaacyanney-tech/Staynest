@@ -13,7 +13,8 @@ export const idle: FormState = { status: "idle" };
 export function formValues(formData: FormData): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [k, v] of formData.entries()) {
-    if (typeof v === "string" && !k.startsWith("$") && !/password|confirm/i.test(k)) out[k] = v;
+    // Repeated names (checkbox groups) are joined with commas.
+    if (typeof v === "string" && !k.startsWith("$") && !/password|confirm/i.test(k)) out[k] = k in out ? `${out[k]},${v}` : v;
   }
   return out;
 }

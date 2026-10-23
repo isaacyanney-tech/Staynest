@@ -8,8 +8,8 @@ StayNest helps students find hostels near Ghanaian universities. Students search
 
 | Stage | Scope | State |
 | --- | --- | --- |
-| 1 | Database, permissions, homepage, search, hostel pages, inspection requests, content pages, pricing, sign-in and sign-up, first dashboards | This branch |
-| 2 | Owner listing editor: hostels, rooms and prices, photo uploads, verification documents | Next |
+| 1 | Database, permissions, homepage, search, hostel pages, inspection requests, content pages, pricing, sign-in and sign-up, first dashboards | Done |
+| 2 | Owner listing editor: hostels, rooms and prices, photo uploads, verification documents, replies to inspection requests | This branch |
 | 3 | Admin console: moderation, verification review, CMS editor with draft, preview, publish and revert, media, site settings, plans | Planned |
 | 4 | Paystack subscriptions and featured placements, verified on the server and by webhook | Planned |
 
@@ -33,6 +33,10 @@ npm run dev
 | `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Browser | Paystack checkout (Stage 4) |
 
 Never commit `.env.local`, and never put a server-only value behind a `NEXT_PUBLIC_` name.
+
+## Owner uploads
+
+Photos and verification documents are checked on the server by their contents, not their names. Photos must be JPEG, PNG, WebP or AVIF, up to 8 MB and at least 400 × 300 pixels; they are re-encoded to WebP at most 2000 px wide, which also removes location and camera metadata. Documents may be PDF or images up to 10 MB, are stored in the private `verification-docs` bucket, readable only by the owner who sent them and by admins. Each plan's photo limit is enforced by the database.
 
 ## Database
 
@@ -65,11 +69,11 @@ If the email has no account, one is created with a random password that is print
 | --- | --- |
 | `npm run typecheck` | TypeScript, including generated route types |
 | `npm run lint` | ESLint |
-| `npm test` | Unit tests (Vitest): theme contrast, search parsing, redirects, CMS schemas, rich text sanitising, formatting |
-| `npm run test:db` | 73 permission tests against every migration on plain PostgreSQL (`PGHOST`, `PGPORT`, `PGUSER` must point at a server) |
+| `npm test` | Unit tests (Vitest): theme contrast, search parsing, redirects, CMS and listing schemas, rich text sanitising, formatting, upload checks |
+| `npm run test:db` | 80 permission tests against every migration on plain PostgreSQL (`PGHOST`, `PGPORT`, `PGUSER` must point at a server) |
 | `npm run test:e2e` | Playwright journeys at 1280, 768 and 375 px with axe accessibility checks and screenshots |
 
-The browser tests run against a production build backed by a local stand-in for Supabase: PostgreSQL with all migrations, [PostgREST](https://postgrest.org) at `.tools/postgrest`, and `e2e/support/fake-supabase.mjs`, which implements the few auth endpoints the app uses. Test accounts use the password `Password1234` and exist only in that local database. Set `E2E_BASE_URL` to run the suite against a deployed site instead.
+The browser tests run against a production build backed by a local stand-in for Supabase: PostgreSQL with all migrations, [PostgREST](https://postgrest.org) at `.tools/postgrest`, and `e2e/support/fake-supabase.mjs`, which implements the few auth endpoints the app uses and keeps uploaded files on disk while checking each upload and delete against the real storage policies. Test accounts use the password `Password1234` and exist only in that local database. Set `E2E_BASE_URL` to run the suite against a deployed site instead.
 
 CI (`.github/workflows/ci.yml`) runs all of the above on every pull request.
 
