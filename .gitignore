@@ -46,3 +46,6 @@ next-env.d.ts
 /playwright-report/
 /screenshots/
 /.tools/
+
+# Netlify local build output
+.netlify/
