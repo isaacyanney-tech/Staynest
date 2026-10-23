@@ -1,0 +1,8 @@
+# Netlify detects Next.js and adds its runtime; these settings stop a wrong
+# value in the Netlify UI (such as a static publish folder) from breaking it.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
