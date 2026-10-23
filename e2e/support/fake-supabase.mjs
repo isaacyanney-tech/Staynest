@@ -1,0 +1,132 @@
+// A small stand-in for the Supabase API, used only by local browser tests when
+// the real project is unreachable. /rest/v1 is proxied to a local PostgREST
+// running on the e2e database; /auth/v1 implements just enough of GoTrue for
+// password sign-in, sign-up and session checks. Never deploy this.
+import { createHmac, randomUUID } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import http from "node:http";
+
+const PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54321);
+const REST = process.env.POSTGREST_URL ?? "http://127.0.0.1:54322";
+export const JWT_SECRET = process.env.E2E_JWT_SECRET ?? "e2e-only-secret-not-used-anywhere-else-000";
+const PASSWORD = "Password1234";
+const DB = process.env.E2E_DB_NAME ?? "staynest_e2e";
+
+const b64 = (v) => Buffer.from(typeof v === "string" ? v : JSON.stringify(v)).toString("base64url");
+export function sign(claims) {
+  const head = b64({ alg: "HS256", typ: "JWT" });
+  const body = b64(claims);
+  const sig = createHmac("sha256", JWT_SECRET).update(`${head}.${body}`).digest("base64url");
+  return `${head}.${body}.${sig}`;
+}
+function verify(token) {
+  const [head, body, sig] = (token ?? "").split(".");
+  if (!sig) return null;
+  const want = createHmac("sha256", JWT_SECRET).update(`${head}.${body}`).digest("base64url");
+  if (want !== sig) return null;
+  const claims = JSON.parse(Buffer.from(body, "base64url").toString());
+  return claims.exp && claims.exp * 1000 < Date.now() ? null : claims;
+}
+
+function sql(query, ...params) {
+  // Parameters are passed as psql variables, never interpolated into SQL text.
+  const args = ["-X", "-q", "-t", "-A", "-v", "ON_ERROR_STOP=1", "-d", DB];
+  params.forEach((p, i) => args.push("-v", `p${i}=${p}`));
+  return execFileSync("psql", args, { input: query }).toString().trim();
+}
+
+function userByEmail(email) {
+  const row = sql(`select json_build_object('id', id, 'email', email, 'meta', raw_user_meta_data) from auth.users where email = :'p0'`, email);
+  return row ? JSON.parse(row) : null;
+}
+function userById(id) {
+  const row = sql(`select json_build_object('id', id, 'email', email, 'meta', raw_user_meta_data) from auth.users where id = :'p0'::uuid`, id);
+  return row ? JSON.parse(row) : null;
+}
+
+function toUser(u) {
+  return {
+    id: u.id,
+    aud: "authenticated",
+    role: "authenticated",
+    email: u.email,
+    email_confirmed_at: new Date().toISOString(),
+    app_metadata: { provider: "email" },
+    user_metadata: u.meta ?? {},
+    created_at: new Date().toISOString(),
+  };
+}
+
+function session(u) {
+  const now = Math.floor(Date.now() / 1000);
+  const access = sign({ sub: u.id, email: u.email, role: "authenticated", aud: "authenticated", iat: now, exp: now + 3600 });
+  return { access_token: access, token_type: "bearer", expires_in: 3600, expires_at: now + 3600, refresh_token: `r.${u.id}`, user: toUser(u) };
+}
+
+const send = (res, status, body) => {
+  res.writeHead(status, { "content-type": "application/json" });
+  res.end(body === undefined ? "" : JSON.stringify(body));
+};
+const readBody = (req) =>
+  new Promise((resolve) => {
+    let data = "";
+    req.on("data", (c) => (data += c));
+    req.on("end", () => resolve(data));
+  });
+
+async function auth(req, res, url) {
+  const path = url.pathname.replace("/auth/v1", "");
+  const raw = await readBody(req);
+  const body = raw ? JSON.parse(raw) : {};
+  const bearer = req.headers.authorization?.replace(/^Bearer /, "");
+
+  if (path === "/token" && url.searchParams.get("grant_type") === "password") {
+    const u = userByEmail(String(body.email ?? "").toLowerCase());
+    if (!u || body.password !== PASSWORD) return send(res, 400, { code: "invalid_credentials", error_code: "invalid_credentials", msg: "Invalid login credentials" });
+    return send(res, 200, session(u));
+  }
+  if (path === "/token" && url.searchParams.get("grant_type") === "refresh_token") {
+    const id = String(body.refresh_token ?? "").replace(/^r\./, "");
+    const u = /^[0-9a-f-]{36}$/.test(id) ? userById(id) : null;
+    return u ? send(res, 200, session(u)) : send(res, 400, { error_code: "refresh_token_not_found", msg: "Invalid Refresh Token" });
+  }
+  if (path === "/user" && req.method === "GET") {
+    const claims = verify(bearer);
+    const u = claims ? userById(claims.sub) : null;
+    return u ? send(res, 200, toUser(u)) : send(res, 401, { code: 401, error_code: "bad_jwt", msg: "invalid JWT" });
+  }
+  if (path === "/signup") {
+    const email = String(body.email ?? "").toLowerCase();
+    if (!userByEmail(email)) {
+      sql(`insert into auth.users (id, email, raw_user_meta_data) values (:'p0'::uuid, :'p1', :'p2'::jsonb)`, randomUUID(), email, JSON.stringify(body.data ?? {}));
+    }
+    // Behaves like a project with email confirmation on: no session yet.
+    return send(res, 200, { ...toUser(userByEmail(email)), identities: [{}] });
+  }
+  if (path === "/logout") return send(res, 204);
+  if (path === "/recover") return send(res, 200, {});
+  return send(res, 404, { msg: `fake-supabase: ${req.method} ${path} not implemented` });
+}
+
+function rest(req, res, url) {
+  const target = new URL(url.pathname.replace("/rest/v1", "") + url.search, REST);
+  const headers = { ...req.headers, host: target.host };
+  // PostgREST rejects tokens it cannot verify; the anon key is not a JWT here.
+  if (!verify(headers.authorization?.replace(/^Bearer /, ""))) delete headers.authorization;
+  const upstream = http.request(target, { method: req.method, headers }, (up) => {
+    res.writeHead(up.statusCode ?? 502, up.headers);
+    up.pipe(res);
+  });
+  upstream.on("error", (e) => send(res, 502, { message: e.message }));
+  req.pipe(upstream);
+}
+
+http
+  .createServer((req, res) => {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    if (url.pathname.startsWith("/auth/v1")) return void auth(req, res, url).catch((e) => send(res, 500, { msg: e.message }));
+    if (url.pathname.startsWith("/rest/v1")) return rest(req, res, url);
+    if (url.pathname.startsWith("/storage/v1")) return send(res, 404, { message: "storage is not available in e2e" });
+    send(res, 404, {});
+  })
+  .listen(PORT, "127.0.0.1", () => console.log(`fake-supabase on http://127.0.0.1:${PORT} -> ${REST}`));
