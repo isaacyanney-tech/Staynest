@@ -48,3 +48,12 @@ describe("changedFields", () => {
     expect(changedFields("nonsense")).toEqual([]);
   });
 });
+
+describe("role change wording", () => {
+  it("uses the right article", () => {
+    const e = (to: string) => ({ action: "profile.access_changed", entity: "profiles", details: { from_role: "guest", to_role: to, from_suspended: false, to_suspended: false } });
+    expect(describeAudit(e("owner"))).toBe("Made an account an owner");
+    expect(describeAudit(e("admin"))).toBe("Made an account an admin");
+    expect(describeAudit(e("student"))).toBe("Made an account a student");
+  });
+});

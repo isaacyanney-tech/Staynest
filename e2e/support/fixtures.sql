@@ -33,7 +33,7 @@ update public.profiles set phone = '+233 27 555 0202' where id = 'e2e00000-0000-
 insert into public.hostels (id, slug, name, summary, description, owner_id, university_id, address, area, city, distance_km,
                             gender_policy, amenities, house_rules, status)
 select v.id::uuid, v.slug, v.name, v.summary, 'Rooms around a shaded courtyard.', 'e2e00000-0000-4000-8000-000000000006', u.id,
-       '4 Review Road', v.area, 'Kumasi', 1.2, 'female', array['wifi', 'security'], '', 'pending_review'
+       '4 Review Road', v.area, 'Kumasi', 1.2, 'mixed', array['wifi', 'security'], '', 'pending_review'
 from public.universities u,
      (values ('e2e10000-0000-4000-8000-000000000002', 'kotei-review-lodge', 'Kotei Review Lodge', 'Quiet rooms ten minutes from campus.', 'Kotei'),
              ('e2e10000-0000-4000-8000-000000000003', 'bomso-review-hostel', 'Bomso Review Hostel', '', 'Bomso')) as v(id, slug, name, summary, area)

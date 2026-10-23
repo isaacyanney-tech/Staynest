@@ -57,7 +57,7 @@ export function describeAudit(e: Pick<AuditEntry, "action" | "entity" | "details
     }
     case "profile.access_changed": {
       const parts: string[] = [];
-      if (d.from_role !== d.to_role && str(d.to_role)) parts.push(`made an account ${d.to_role === "admin" ? "an admin" : `a ${d.to_role}`}`);
+      if (d.from_role !== d.to_role && str(d.to_role)) parts.push(`made an account ${d.to_role === "admin" ? "an admin" : d.to_role === "owner" ? "an owner" : `a ${d.to_role}`}`);
       if (d.from_suspended !== d.to_suspended) parts.push(d.to_suspended ? "suspended an account" : "restored an account");
       const text = parts.join(" and ") || "changed an account's access";
       return text[0].toUpperCase() + text.slice(1);

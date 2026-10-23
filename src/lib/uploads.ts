@@ -24,7 +24,7 @@ export function sniff(bytes: Uint8Array): Sniffed {
 export class UploadError extends Error {}
 
 /** Checks a photo upload and returns a re-encoded WebP no larger than 2000px. */
-export async function preparePhoto(file: File): Promise<{ data: Buffer; width: number; height: number }> {
+export async function preparePhoto(file: File, min = { width: 400, height: 300 }): Promise<{ data: Buffer; width: number; height: number }> {
   if (!file || file.size === 0) throw new UploadError("Choose a photo to upload.");
   if (file.size > MAX_PHOTO_BYTES) throw new UploadError("Photos must be 8 MB or smaller.");
   const input = new Uint8Array(await file.arrayBuffer());
@@ -38,8 +38,8 @@ export async function preparePhoto(file: File): Promise<{ data: Buffer; width: n
       .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
       .webp({ quality: 82 })
       .toBuffer({ resolveWithObject: true });
-    if (info.width < 400 || info.height < 300) {
-      throw new UploadError("Photos must be at least 400 by 300 pixels.");
+    if (info.width < min.width || info.height < min.height) {
+      throw new UploadError(`Photos must be at least ${min.width} by ${min.height} pixels.`);
     }
     return { data, width: info.width, height: info.height };
   } catch (e) {

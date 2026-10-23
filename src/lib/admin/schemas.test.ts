@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { businessValue, moderationSchema, planFromForm, verificationDecisionSchema } from "./schemas";
+import { bannerFromForm, businessValue, moderationSchema, navItemFromForm, planFromForm, siteGroupFromForm, verificationDecisionSchema } from "./schemas";
 
 const id = "6f1c1f9e-8a51-4d5c-9b6e-0d6f3b9b1a11";
 
@@ -48,5 +48,52 @@ describe("businessValue", () => {
     expect(businessValue("x.enabled", false, "on")).toEqual({ ok: true, value: true });
     expect(businessValue("x.text", "hello", "  hi ")).toEqual({ ok: true, value: "hi" });
     expect(businessValue("x.obj", { a: 1 }, "x")).toMatchObject({ ok: false });
+  });
+});
+
+const form = (entries: Record<string, string>) => {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(entries)) fd.set(k, v);
+  return fd;
+};
+
+describe("site settings", () => {
+  it("only offers approved colours", () => {
+    expect(siteGroupFromForm("theme", form({ primary: "#173B57", secondary: "#18A999" })).success).toBe(true);
+    expect(siteGroupFromForm("theme", form({ primary: "#FF00FF", secondary: "#18A999" })).success).toBe(false);
+  });
+  it("social links must be https or blank", () => {
+    expect(siteGroupFromForm("social", form({ facebook: "https://facebook.com/staynest", instagram: "", x: "", tiktok: "" })).success).toBe(true);
+    expect(siteGroupFromForm("social", form({ facebook: "javascript:alert(1)", instagram: "", x: "", tiktok: "" })).success).toBe(false);
+    expect(siteGroupFromForm("social", form({ facebook: "http://facebook.com", instagram: "", x: "", tiktok: "" })).success).toBe(false);
+  });
+  it("blank logo means the built-in one", () => {
+    const r = siteGroupFromForm("identity", form({ site_name: "StayNest", tagline: "", logo_media_id: "", favicon_media_id: "" }));
+    expect(r.success && r.data.logo_media_id).toBe(null);
+  });
+  it("ignores fields from other groups", () => {
+    const r = siteGroupFromForm("contact", form({ email: "", phone: "+233 20 000 0000", address: "", hours: "", site_name: "x" }));
+    expect(r.success && Object.keys(r.data).sort()).toEqual(["address", "email", "hours", "phone"]);
+  });
+});
+
+describe("navigation and banners", () => {
+  const nav = { id: "", location: "footer", group_label: "", label: "About", href: "/about", is_visible: "on" };
+  it("links are site paths or https", () => {
+    expect(navItemFromForm(form(nav)).success).toBe(true);
+    expect(navItemFromForm(form({ ...nav, href: "//evil.example" })).success).toBe(false);
+    expect(navItemFromForm(form({ ...nav, href: "javascript:alert(1)" })).success).toBe(false);
+    expect(navItemFromForm(form({ ...nav, href: "https://wa.me/233200000000" })).success).toBe(true);
+  });
+  const banner = { id: "", message: "Applications open", link_label: "", link_href: "", tone: "info", starts_at: "", ends_at: "" };
+  it("a banner link needs both text and address", () => {
+    expect(bannerFromForm(form(banner)).success).toBe(true);
+    expect(bannerFromForm(form({ ...banner, link_label: "Read more" })).success).toBe(false);
+    expect(bannerFromForm(form({ ...banner, link_label: "Read more", link_href: "/faq" })).success).toBe(true);
+  });
+  it("a banner must end after it starts", () => {
+    expect(bannerFromForm(form({ ...banner, starts_at: "2026-11-02T09:00", ends_at: "2026-11-01T09:00" })).success).toBe(false);
+    const ok = bannerFromForm(form({ ...banner, starts_at: "2026-11-01T09:00", ends_at: "2026-11-02T09:00" }));
+    expect(ok.success && ok.data.is_active).toBe(false);
   });
 });

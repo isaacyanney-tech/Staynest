@@ -1,16 +1,14 @@
 import type React from "react";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, LogOut } from "lucide-react";
+import { signOut } from "@/lib/actions/auth";
 import { Wordmark } from "@/components/site/logo";
 import { AdminNav, AdminNavList } from "@/components/admin/admin-nav";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-full bg-bg">
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2">
-        Skip to content
-      </a>
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
@@ -20,10 +18,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Link>
             <span className="rounded-sm bg-primary px-1.5 py-0.5 text-xs font-medium text-white">Admin</span>
           </div>
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink/75 hover:text-primary">
-            View site
-            <ExternalLink className="size-3.5" aria-hidden />
-          </Link>
+          <div className="flex items-center gap-1">
+            <Link href="/" className="inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-ink/75 hover:text-primary">
+              <span className="sr-only sm:not-sr-only">View site</span>
+              <ExternalLink className="size-4 sm:size-3.5" aria-hidden />
+            </Link>
+            <form action={signOut}>
+              <button type="submit" className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium text-ink/75 hover:bg-sunken hover:text-ink">
+                <LogOut className="size-4" aria-hidden />
+                <span className="sr-only sm:not-sr-only">Sign out</span>
+              </button>
+            </form>
+          </div>
         </div>
       </header>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:grid lg:grid-cols-[13rem_1fr] lg:gap-10">

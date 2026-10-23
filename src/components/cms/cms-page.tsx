@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { getPage, getSiteSettings, type PublishedSection } from "@/lib/cms/queries";
 import { formatDate } from "@/lib/format";
 import { RichText } from "./rich-text";
@@ -16,15 +16,20 @@ export async function cmsMetadata(slug: string): Promise<Metadata> {
 export async function CmsPage({ slug }: { slug: string }) {
   const page = await getPage(slug);
   if (!page) notFound();
+  return <CmsSections slug={slug} sections={page.sections} updatedAt={page.updated_at} />;
+}
+
+/** The body of a content page; the admin preview passes draft sections. */
+export async function CmsSections({ slug, sections, updatedAt }: { slug: string; sections: PublishedSection[]; updatedAt: string }) {
   const settings = slug === "contact" ? await getSiteSettings() : null;
   const legal = slug === "terms" || slug === "privacy";
 
   return (
     <div className="mx-auto max-w-3xl px-4 pb-24 pt-10 sm:px-6 md:pt-14">
-      {page.sections.map((section, i) => (
+      {sections.map((section, i) => (
         <Section key={section.id} section={section} first={i === 0} contact={(settings?.contact ?? null) as Record<string, string> | null} />
       ))}
-      {legal && <p className="mt-12 border-t border-line pt-6 text-sm text-muted">Last updated {formatDate(page.updated_at)}.</p>}
+      {legal && <p className="mt-12 border-t border-line pt-6 text-sm text-muted">Last updated {formatDate(updatedAt)}.</p>}
     </div>
   );
 }
@@ -95,6 +100,11 @@ function Section({ section, first, contact }: { section: PublishedSection; first
               {contact.address && (
                 <ContactItem icon={<MapPin className="size-4" aria-hidden />} label="Address">
                   {contact.address}
+                </ContactItem>
+              )}
+              {contact.hours && (
+                <ContactItem icon={<Clock className="size-4" aria-hidden />} label="Opening hours">
+                  {contact.hours}
                 </ContactItem>
               )}
             </dl>

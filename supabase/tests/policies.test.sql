@@ -332,6 +332,25 @@ select tests.is('restore copies the revision into the draft',
     where section_id = (select id from public.page_sections where key = 'hero')), 'New heading');
 select tests.is('admin sees revisions', (select count(*) from public.content_revisions)::int >= 2, true);
 
+-- Site chrome and media: anyone reads what is live, only admins write.
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+select tests.throws('owner cannot add a menu link',
+  $$insert into public.navigation_items (location, label, href) values ('header', 'Win', '/x')$$);
+select tests.throws('owner cannot add a banner',
+  $$insert into public.promo_banners (message, is_active) values ('Free rooms', true)$$);
+select tests.throws('owner cannot add a site image',
+  $$insert into public.media_assets (external_url, alt_text) values ('https://example.com/a.jpg', 'x')$$);
+select tests.throws('owner cannot upload to the site folder',
+  $$insert into storage.objects (bucket_id, name) values ('public-media', 'site/x.webp')$$);
+select tests.act_as('00000000-0000-0000-0000-00000000000a');
+insert into public.promo_banners (message, is_active, starts_at) values ('Later', true, now() + interval '1 day');
+insert into public.navigation_items (location, label, href, is_visible) values ('header', 'Hidden link', '/hidden', false);
+select tests.throws('menu links reject script URLs',
+  $$insert into public.navigation_items (location, label, href) values ('header', 'x', 'javascript:alert(1)')$$);
+select tests.act_as(null);
+select tests.is('a scheduled banner is not shown yet', (select count(*) from public.promo_banners where message = 'Later')::int, 0);
+select tests.is('a hidden menu link is not shown', (select count(*) from public.navigation_items where label = 'Hidden link')::int, 0);
+
 -- ---------------------------------------------------------------- billing
 select tests.act_as('00000000-0000-0000-0000-0000000000a1');
 select tests.throws('owner cannot record a payment',

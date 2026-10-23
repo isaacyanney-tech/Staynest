@@ -13,23 +13,27 @@ async function asAdmin(page: Page) {
 test.describe("admin console", () => {
   test("overview and queues are accessible @responsive", async ({ page }, info) => {
     await asAdmin(page);
-    await expect(page.getByRole("link", { name: /Listings waiting for review/ })).toContainText("2");
-    await expect(page.getByRole("link", { name: /Verification requests to review/ })).toContainText("1");
+    // Counts change as other tests act on the queues, so only the cards are checked here.
+    await expect(page.getByRole("link", { name: /Listings waiting for review/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Verification requests to review/ })).toBeVisible();
     await expectAccessible(page);
     await screenshot(page, `admin-overview-${info.project.name}`);
 
     await page.goto("/admin/listings");
-    await expect(page.getByRole("link", { name: "Kotei Review Lodge" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Bomso Review Hostel" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Listings" })).toBeVisible();
     await expectAccessible(page);
     await screenshot(page, `admin-listings-${info.project.name}`);
   });
 
   test("approving a listing publishes it to students", async ({ page }) => {
     await page.goto("/hostels/kotei-review-lodge");
+    await expect(page.getByRole("heading", { name: "We could not find that page" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Kotei Review Lodge" })).toHaveCount(0);
 
     await asAdmin(page);
+    await page.goto("/admin/listings");
+    await expect(page.getByRole("link", { name: "Kotei Review Lodge" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Bomso Review Hostel" })).toBeVisible();
     await page.goto(`/admin/listings/${approveId}`);
     await expect(page.getByRole("heading", { name: "Kotei Review Lodge", level: 1 })).toBeVisible();
     await expect(page.getByText("No photos", { exact: true })).toBeVisible();
@@ -119,6 +123,11 @@ test.describe("admin console", () => {
 
     await page.goto("/pricing");
     await expect(page.getByRole("main")).toContainText("175");
+    // Put the price back so other tests see the seeded plans.
+    await page.goto("/admin/plans");
+    await page.getByRole("region", { name: "Standard" }).getByLabel("Price (GHS)").fill("150");
+    await page.getByRole("region", { name: "Standard" }).getByRole("button", { name: "Save Standard" }).click();
+    await expect(page.getByRole("region", { name: "Standard" }).getByText("Saved Standard.")).toBeVisible();
 
     await page.goto("/admin/settings");
     const slots = page.getByRole("listitem").filter({ hasText: "Featured hostels on the homepage" });
