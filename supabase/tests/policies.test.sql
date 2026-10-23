@@ -216,6 +216,19 @@ select tests.is('other owner sees no student profiles',
   (select count(*) from public.profiles where role = 'student')::int, 0);
 select tests.reset_role();
 
+-- ---------------------------------------------------------------- photo limits
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+insert into public.hostel_media (hostel_id, storage_path, alt_text, sort_order)
+select h.id, 'hostels/' || h.id || '/' || n || '.webp', 'Room photo ' || n, n
+  from public.hostels h, generate_series(1, 8) n where h.slug = 'owner-one-hostel';
+select tests.is('owner can add photos up to the plan limit',
+  (select count(*) from public.hostel_media m join public.hostels h on h.id = m.hostel_id where h.slug = 'owner-one-hostel')::int, 8);
+select tests.throws('plan photo limit is enforced',
+  $$insert into public.hostel_media (hostel_id, storage_path, alt_text)
+    select id, 'hostels/' || id || '/9.webp', 'Room photo 9' from public.hostels where slug = 'owner-one-hostel'$$, 'P0001');
+select tests.reset_role();
+delete from public.hostel_media m using public.hostels h where h.id = m.hostel_id and h.slug = 'owner-one-hostel' and m.sort_order > 2;
+
 -- ---------------------------------------------------------------- verification
 select tests.act_as('00000000-0000-0000-0000-0000000000a1');
 insert into public.verification_applications (hostel_id, owner_id, status, owner_note)
@@ -224,6 +237,18 @@ select tests.is('application starts pending',
   (select status::text from public.verification_applications limit 1), 'pending');
 select tests.throws('owner cannot approve own application',
   $$update public.verification_applications set status = 'approved'$$, '42501');
+insert into public.verification_documents (application_id, storage_path, doc_type, file_name)
+select id, auth.uid() || '/' || id || '/deed.pdf', 'ownership', 'deed.pdf' from public.verification_applications;
+select tests.is('owner can attach a document in their own folder',
+  (select count(*) from public.verification_documents)::int, 1);
+select tests.throws('documents must live in the owner''s folder',
+  $$insert into public.verification_documents (application_id, storage_path, doc_type, file_name)
+    select id, '00000000-0000-0000-0000-0000000000a2/' || id || '/x.pdf', 'other', 'x.pdf' from public.verification_applications$$);
+select tests.act_as('00000000-0000-0000-0000-0000000000a2');
+delete from public.verification_applications;
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+select tests.is('other owner cannot withdraw someone else''s request',
+  (select count(*) from public.verification_applications)::int, 1);
 select tests.act_as('00000000-0000-0000-0000-0000000000a2');
 select tests.throws('owner cannot apply for another owner''s hostel',
   $$insert into public.verification_applications (hostel_id, owner_id)
@@ -235,6 +260,16 @@ select tests.is('approval marks hostel verified',
   (select is_verified from public.hostels where slug = 'owner-one-hostel'), true);
 select tests.is('decision is audited',
   (select count(*) from public.audit_log where action = 'verification.decided')::int, 1);
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+delete from public.verification_applications;
+select tests.is('owner cannot withdraw a reviewed request',
+  (select count(*) from public.verification_applications)::int, 1);
+insert into public.verification_applications (hostel_id, owner_id)
+select id, auth.uid() from public.hostels where slug = 'owner-one-hostel';
+delete from public.verification_applications where status = 'pending';
+select tests.is('owner can withdraw an unreviewed request',
+  (select count(*) from public.verification_applications)::int, 1);
+select tests.reset_role();
 
 -- ---------------------------------------------------------------- storage
 select tests.act_as('00000000-0000-0000-0000-0000000000a1');

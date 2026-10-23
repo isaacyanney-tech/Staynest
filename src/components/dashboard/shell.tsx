@@ -26,7 +26,7 @@ export function DashboardHeader({ viewer, title, children }: { viewer: Viewer; t
 
 export function DashboardSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading dashboard">
+    <div role="status" aria-busy="true" aria-label="Loading dashboard">
       <div className="skeleton h-4 w-32 rounded" />
       <div className="skeleton mt-3 h-9 w-64 rounded" />
       <div className="skeleton mt-10 h-48 rounded-lg" />

@@ -1,9 +1,14 @@
 // A small stand-in for the Supabase API, used only by local browser tests when
 // the real project is unreachable. /rest/v1 is proxied to a local PostgREST
 // running on the e2e database; /auth/v1 implements just enough of GoTrue for
-// password sign-in, sign-up and session checks. Never deploy this.
+// password sign-in, sign-up and session checks, and /storage/v1 keeps files on
+// disk while checking every write against the real storage.objects policies.
+// Never deploy this.
 import { createHmac, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
+import { mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join, normalize } from "node:path";
 import http from "node:http";
 
 const PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54321);
@@ -11,6 +16,9 @@ const REST = process.env.POSTGREST_URL ?? "http://127.0.0.1:54322";
 export const JWT_SECRET = process.env.E2E_JWT_SECRET ?? "e2e-only-secret-not-used-anywhere-else-000";
 const PASSWORD = "Password1234";
 const DB = process.env.E2E_DB_NAME ?? "staynest_e2e";
+const FILES = process.env.FAKE_STORAGE_DIR ?? join(tmpdir(), "staynest-e2e-storage");
+rmSync(FILES, { recursive: true, force: true });
+mkdirSync(FILES, { recursive: true });
 
 const b64 = (v) => Buffer.from(typeof v === "string" ? v : JSON.stringify(v)).toString("base64url");
 export function sign(claims) {
@@ -108,6 +116,74 @@ async function auth(req, res, url) {
   return send(res, 404, { msg: `fake-supabase: ${req.method} ${path} not implemented` });
 }
 
+const readRaw = (req) =>
+  new Promise((resolve) => {
+    const chunks = [];
+    req.on("data", (c) => chunks.push(c));
+    req.on("end", () => resolve(Buffer.concat(chunks)));
+  });
+
+/** Runs SQL as the signed-in user so storage.objects row-level security applies. */
+function sqlAs(claims, query, ...params) {
+  return sql(`begin;\nset local role authenticated;\nselect set_config('request.jwt.claims', :'p0', true) \\g /dev/null\n${query}\ncommit;`, JSON.stringify(claims), ...params);
+}
+
+function filePath(bucket, name) {
+  const p = normalize(join(FILES, bucket, name));
+  if (!p.startsWith(join(FILES, bucket) + "/")) throw new Error("bad path");
+  return p;
+}
+
+async function storage(req, res, url) {
+  const path = decodeURIComponent(url.pathname.replace("/storage/v1", ""));
+  const claims = verify(req.headers.authorization?.replace(/^Bearer /, ""));
+
+  const pub = path.match(/^\/object\/public\/([\w-]+)\/(.+)$/);
+  if (pub && req.method === "GET") {
+    const [, bucket, name] = pub;
+    const isPublic = sql(`select public from storage.buckets where id = :'p0'`, bucket) === "t";
+    const file = isPublic ? filePath(bucket, name) : null;
+    if (!file || !existsSync(file)) return send(res, 400, { statusCode: "404", error: "not_found", message: "Object not found" });
+    res.writeHead(200, { "content-type": readFileSync(`${file}.type`, "utf8"), "cache-control": "public, max-age=3600" });
+    return res.end(readFileSync(file));
+  }
+
+  const upload = path.match(/^\/object\/([\w-]+)\/(.+)$/);
+  if (upload && req.method === "POST") {
+    const [, bucket, name] = upload;
+    const data = await readRaw(req);
+    if (!claims) return send(res, 400, { statusCode: "403", error: "Unauthorized", message: "Missing or invalid token" });
+    try {
+      sqlAs(claims, `insert into storage.objects (bucket_id, name, owner) values (:'p1', :'p2', :'p3'::uuid);`, bucket, name, claims.sub);
+    } catch {
+      return send(res, 400, { statusCode: "403", error: "Unauthorized", message: "new row violates row-level security policy" });
+    }
+    const file = filePath(bucket, name);
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, data);
+    writeFileSync(`${file}.type`, String(req.headers["content-type"] ?? "application/octet-stream"));
+    return send(res, 200, { Key: `${bucket}/${name}`, Id: randomUUID() });
+  }
+
+  const remove = path.match(/^\/object\/([\w-]+)$/);
+  if (remove && req.method === "DELETE") {
+    const [, bucket] = remove;
+    const { prefixes = [] } = JSON.parse((await readRaw(req)).toString() || "{}");
+    if (!claims) return send(res, 200, []);
+    const removed = [];
+    for (const name of prefixes) {
+      const out = sqlAs(claims, `delete from storage.objects where bucket_id = :'p1' and name = :'p2' returning name;`, bucket, name);
+      if (out.includes(name)) {
+        rmSync(filePath(bucket, name), { force: true });
+        rmSync(`${filePath(bucket, name)}.type`, { force: true });
+        removed.push({ name, bucket_id: bucket });
+      }
+    }
+    return send(res, 200, removed);
+  }
+  return send(res, 404, { message: `fake-supabase: ${req.method} storage ${path} not implemented` });
+}
+
 function rest(req, res, url) {
   const target = new URL(url.pathname.replace("/rest/v1", "") + url.search, REST);
   const headers = { ...req.headers, host: target.host };
@@ -126,7 +202,7 @@ http
     const url = new URL(req.url, `http://${req.headers.host}`);
     if (url.pathname.startsWith("/auth/v1")) return void auth(req, res, url).catch((e) => send(res, 500, { msg: e.message }));
     if (url.pathname.startsWith("/rest/v1")) return rest(req, res, url);
-    if (url.pathname.startsWith("/storage/v1")) return send(res, 404, { message: "storage is not available in e2e" });
+    if (url.pathname.startsWith("/storage/v1")) return void storage(req, res, url).catch((e) => send(res, 500, { message: e.message }));
     send(res, 404, {});
   })
   .listen(PORT, "127.0.0.1", () => console.log(`fake-supabase on http://127.0.0.1:${PORT} -> ${REST}`));

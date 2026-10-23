@@ -1,0 +1,13 @@
+# Build settings live here so a wrong value in the Netlify UI (such as a
+# static publish folder) cannot break the deploy.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# The Next.js runtime turns the build into Netlify functions for server
+# rendering, server actions and image optimisation.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

@@ -1,12 +1,14 @@
 import type { NextConfig } from "next";
 
-const supabaseHost = (() => {
+const supabaseUrl = (() => {
   try {
-    return process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname : null;
+    return process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL) : null;
   } catch {
     return null;
   }
 })();
+// Only the browser-test build points Supabase at this machine.
+const localSupabase = supabaseUrl?.hostname === "127.0.0.1" || supabaseUrl?.hostname === "localhost";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -16,10 +18,16 @@ const nextConfig: NextConfig = {
     // hotlinked from Unsplash under the Unsplash License.
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
-      ...(supabaseHost
-        ? [{ protocol: "https" as const, hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }]
-        : [{ protocol: "https" as const, hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" }]),
+      supabaseUrl
+        ? {
+            protocol: supabaseUrl.protocol === "http:" ? ("http" as const) : ("https" as const),
+            hostname: supabaseUrl.hostname,
+            port: supabaseUrl.port,
+            pathname: "/storage/v1/object/public/**",
+          }
+        : { protocol: "https" as const, hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },
     ],
+    dangerouslyAllowLocalIP: localSupabase,
   },
   experimental: {
     // Hostel photos and verification documents are uploaded through server actions.
