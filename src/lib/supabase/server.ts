@@ -1,6 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "./database.types";
+import { timeoutFetch } from "./timeout-fetch";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { assertSupabaseConfigured, publicEnv } from "@/lib/env";
@@ -13,6 +14,7 @@ export async function createClient() {
   // prefetched or prerendered result, so render it at request time only.
   await connection();
   return createServerClient<Database>(publicEnv.supabaseUrl, publicEnv.supabaseAnonKey, {
+    global: { fetch: timeoutFetch },
     cookies: {
       getAll() {
         return cookieStore.getAll();

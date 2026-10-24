@@ -515,4 +515,56 @@ select tests.reset_role();
 select tests.is('student cannot unhide',
   (select is_hidden from public.hostel_ratings), true);
 
+-- Rate limits and throttles.
+select tests.reset_role();
+select tests.act_as(null);
+select tests.throws('visitors cannot call the rate limiter', $$select public.take_rate_limit('x', 1, 60)$$, '42501');
+select tests.act_as('00000000-0000-0000-0000-0000000000b1');
+select tests.throws('users cannot call the rate limiter', $$select public.take_rate_limit('x', 1, 60)$$, '42501');
+select tests.throws('users cannot read rate limit counters', $$select * from public.rate_limits$$, '42501');
+select tests.reset_role();
+set role service_role;
+select public.take_rate_limit('test:ip:1', 2, 600) as first_hit \gset
+select public.take_rate_limit('test:ip:1', 2, 600) as second_hit \gset
+select public.take_rate_limit('test:ip:1', 2, 600) as third_hit \gset
+reset role;
+select tests.is('first hit allowed', :'first_hit'::boolean, true);
+select tests.is('second hit allowed', :'second_hit'::boolean, true);
+select tests.is('third hit refused', :'third_hit'::boolean, false);
+select tests.is('checking without a hit reports the limit', public.take_rate_limit('test:ip:1', 2, 600, 0), false);
+select tests.is('checking an unused key allows it', public.take_rate_limit('test:ip:2', 2, 600, 0), true);
+select tests.is('checking records nothing', (select count(*) from public.rate_limits where key = 'test:ip:2')::int, 0);
+-- Fill one student's hourly allowance of inspection requests.
+insert into public.rate_limits (key, window_start, hits)
+values ('w:inspection_requests:00000000-0000-0000-0000-0000000000b2',
+        to_timestamp(floor(extract(epoch from now()) / 3600) * 3600), 10)
+on conflict (key, window_start) do update set hits = 10;
+select tests.act_as('00000000-0000-0000-0000-0000000000b2');
+select tests.throws('too many inspection requests in an hour are refused',
+  $$insert into public.inspection_requests (hostel_id, student_id, preferred_date, preferred_time)
+    select id, auth.uid(), current_date + 2, 'morning' from public.hostels where slug = 'owner-one-hostel'$$, 'P0001');
+select tests.reset_role();
+
+-- A repeated checkout reuses the unfinished payment instead of opening another.
+select tests.act_as('00000000-0000-0000-0000-0000000000a2');
+select reference as ref1 from public.start_payment('subscription', 'standard') \gset
+select reference as ref2 from public.start_payment('subscription', 'standard') \gset
+select tests.is('a second click reuses the open payment', :'ref2'::text, :'ref1'::text);
+select tests.is('only one pending payment exists',
+  (select count(*) from public.payments where owner_id = auth.uid() and status = 'pending')::int, 1);
+select public.remember_checkout(:'ref1', 'https://checkout.paystack.com/abc');
+select tests.is('the checkout page is remembered',
+  (select checkout_url from public.payments where reference = :'ref1'), 'https://checkout.paystack.com/abc');
+select tests.throws('only web addresses are stored', $$select public.remember_checkout('x', 'javascript:alert(1)')$$, '22023');
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+select public.remember_checkout(:'ref1', 'https://evil.example/');
+select tests.reset_role();
+select tests.is('owners cannot change another owner''s checkout',
+  (select checkout_url from public.payments where reference = :'ref1'), 'https://checkout.paystack.com/abc');
+update public.payments set status = 'abandoned' where reference = :'ref1';
+select tests.act_as('00000000-0000-0000-0000-0000000000a2');
+select reference as ref3 from public.start_payment('subscription', 'standard') \gset
+select tests.reset_role();
+select tests.is('an abandoned checkout is not reused', :'ref3'::text <> :'ref1'::text, true);
+
 \echo 'All policy tests passed'

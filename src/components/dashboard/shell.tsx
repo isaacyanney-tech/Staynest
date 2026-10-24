@@ -4,6 +4,7 @@ import { ArrowUpRight, LogOut, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { signOut } from "@/lib/actions/auth";
 import type { Viewer } from "@/lib/auth";
+import { PendingButton } from "@/components/ui/submit-button";
 
 export type DashboardStat = {
   label: string;
@@ -64,13 +65,10 @@ export function DashboardHeader({
           {children}
           {showSignOut && (
             <form action={signOut}>
-              <button
-                type="submit"
-                className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-              >
+              <PendingButton className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/10 hover:text-white">
                 <LogOut className="size-4" aria-hidden />
                 Sign out
-              </button>
+              </PendingButton>
             </form>
           )}
         </div>

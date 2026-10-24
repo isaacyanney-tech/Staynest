@@ -43,7 +43,18 @@ test.describe("light and dark mode", () => {
 
   test("homepage hero draws the wave background, and reduced motion keeps headings still", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(".hero-waves canvas")).toHaveCount(1);
+    // Browsers that would draw WebGL in software (like headless CI machines)
+    // get the plain gradient; everyone else gets the canvas.
+    const hardwareGl = await page.evaluate(() => {
+      const gl = document.createElement("canvas").getContext("webgl2", { failIfMajorPerformanceCaveat: true });
+      const info = gl?.getExtension("WEBGL_debug_renderer_info");
+      const name = gl && info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
+      return gl !== null && !/swiftshader|llvmpipe|softpipe|software|basic render driver/i.test(name);
+    });
+    // Wait for the lazily loaded waves component before counting.
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator(".hero-waves canvas")).toHaveCount(hardwareGl ? 1 : 0);
+    await expect(page.locator(".hero-band").first()).toHaveCSS("background-image", /gradient/);
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.reload();
     const heading = page.locator("main h2").first();

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { settlePayment } from "@/lib/billing/settle";
 import { paymentReferenceSchema, type ReturnOutcome } from "@/lib/billing/schemas";
 import { PaystackError } from "@/lib/paystack";
+import { logError } from "@/lib/log";
 
 // Paystack sends the owner here after checkout with ?reference=. The result is
 // read from Paystack's API, never from the query string, so visiting this
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
   try {
     outcome = await settlePayment(reference.data);
   } catch (e) {
-    if (!(e instanceof PaystackError)) console.error("Paystack callback failed", e);
+    if (!(e instanceof PaystackError)) logError("paystack_callback_failed", e);
     outcome = "error";
   }
   return back({ payment: outcome, ref: reference.data });

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { settlePayment } from "@/lib/billing/settle";
 import { paymentReferenceSchema } from "@/lib/billing/schemas";
 import { isValidSignature } from "@/lib/paystack";
+import { logError } from "@/lib/log";
 
 // Paystack calls this for every transaction event. The body must carry a
 // valid HMAC signature, and even then only its reference is used: the
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true, result });
   } catch (e) {
     // A non-2xx answer makes Paystack retry later.
-    console.error("Paystack webhook could not settle", reference.data, e);
+    logError("paystack_webhook_settle_failed", e, { reference: reference.data });
     return new NextResponse(null, { status: 503 });
   }
 }

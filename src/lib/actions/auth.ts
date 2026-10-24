@@ -7,6 +7,7 @@ import { publicEnv } from "@/lib/env";
 import { formValues, fromZodError, type FormState } from "@/lib/forms";
 import { safeNext } from "@/lib/safe-next";
 import { newPassword, passwordChangeSchema } from "@/lib/account/schemas";
+import { clientIp, LIMITS, rateLimit, TOO_MANY } from "@/lib/rate-limit";
 
 const email = z.email("Enter a valid email address.").trim().toLowerCase().max(254);
 
@@ -27,10 +28,22 @@ async function doSignIn(formData: FormData, area: "site" | "admin"): Promise<For
   const parsed = signInSchema.safeParse({ email: formData.get("email"), password: formData.get("password") });
   if (!parsed.success) return fromZodError(parsed.error, formData);
 
+  // Every attempt counts towards a generous per-address limit; only failures
+  // count towards the tighter per-address and per-account limits.
+  const ip = await clientIp();
+  const failuresByIp = `signin-fail:ip:${ip}`;
+  const failuresByEmail = `signin-fail:email:${parsed.data.email}`;
+  const allowed =
+    (await rateLimit(`signin:ip:${ip}`, LIMITS.signInAttemptsPerIp)) &&
+    (await rateLimit(failuresByIp, LIMITS.signInFailuresPerIp, 0)) &&
+    (await rateLimit(failuresByEmail, LIMITS.signInFailuresPerEmail, 0));
+  if (!allowed) return { status: "error", message: TOO_MANY, values: formValues(formData) };
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   const invalid: FormState = { status: "error", message: "That email and password do not match an account.", values: formValues(formData) };
   if (error || !data.user) {
+    await Promise.all([rateLimit(failuresByIp, LIMITS.signInFailuresPerIp), rateLimit(failuresByEmail, LIMITS.signInFailuresPerEmail)]);
     if (error?.code === "email_not_confirmed") {
       return { status: "error", message: "Confirm your email address first. We sent you a link when you signed up.", values: formValues(formData) };
     }
@@ -68,6 +81,9 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
     terms: formData.get("terms"),
   });
   if (!parsed.success) return fromZodError(parsed.error, formData);
+  if (!(await rateLimit(`signup:ip:${await clientIp()}`, LIMITS.signUpsPerIp))) {
+    return { status: "error", message: TOO_MANY, values: formValues(formData) };
+  }
 
   const next = safeNext(formData.get("next"));
   const supabase = await createClient();
@@ -98,6 +114,10 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
 export async function requestPasswordReset(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = z.object({ email }).safeParse({ email: formData.get("email") });
   if (!parsed.success) return fromZodError(parsed.error, formData);
+  const allowed =
+    (await rateLimit(`reset:ip:${await clientIp()}`, LIMITS.resetsPerIp)) &&
+    (await rateLimit(`reset:email:${parsed.data.email}`, LIMITS.resetsPerEmail));
+  if (!allowed) return { status: "error", message: TOO_MANY, values: formValues(formData) };
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${publicEnv.siteUrl}/auth/callback?next=/reset-password`,

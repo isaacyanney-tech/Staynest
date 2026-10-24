@@ -10,6 +10,7 @@ import { featuredCheckoutSchema, includedWeekSchema, paymentReferenceSchema, pla
 import { settlePayment, type SettleResult } from "@/lib/billing/settle";
 import { initializeTransaction, paymentsConfigured, PaystackError } from "@/lib/paystack";
 import { formatDate } from "@/lib/format";
+import { logError } from "@/lib/log";
 import { formValues, fromZodError, friendlyDbError, type FormState } from "@/lib/forms";
 
 // Prices are never taken from the form: start_payment() reads them from the
@@ -38,6 +39,11 @@ async function callbackUrl(): Promise<string> {
   return `${proto}://${host}/dashboard/owner/billing/callback`;
 }
 
+async function openCheckout(supabase: Awaited<ReturnType<typeof createClient>>, reference: string): Promise<string | null> {
+  const { data } = await supabase.from("payments").select("checkout_url").eq("reference", reference).eq("status", "pending").maybeSingle();
+  return data?.checkout_url ?? null;
+}
+
 async function checkout(
   viewer: Viewer,
   formData: FormData,
@@ -48,9 +54,15 @@ async function checkout(
   const { data, error } = await supabase.rpc("start_payment", args);
   const payment = data?.[0];
   if (error || !payment) {
-    console.error("start_payment failed", error ?? "no payment returned");
+    logError("start_payment_failed", error ?? new Error("no payment returned"), { purpose: args.p_purpose });
     return { status: "error", message: friendlyDbError(error), values: formValues(formData) };
   }
+
+  // start_payment hands back the same unfinished payment for a repeated
+  // click, so send the owner back to the checkout already opened for it
+  // rather than opening a second one they could also pay.
+  const opened = await openCheckout(supabase, payment.reference);
+  if (opened) redirect(opened);
 
   let url: string;
   try {
@@ -63,9 +75,21 @@ async function checkout(
       metadata: { purpose: args.p_purpose, description: payment.description },
     });
   } catch (e) {
-    if (e instanceof PaystackError) return { status: "error", message: e.message, values: formValues(formData) };
+    if (e instanceof PaystackError) {
+      // Paystack refuses a reference twice: another click may be opening this
+      // checkout right now, so wait briefly for it before giving up.
+      for (let i = 0; i < 8; i++) {
+        const other = await openCheckout(supabase, payment.reference);
+        if (other) redirect(other);
+        await new Promise((r) => setTimeout(r, 400));
+      }
+      logError("paystack_initialize_failed", e, { reference: payment.reference });
+      return { status: "error", message: e.message, values: formValues(formData) };
+    }
     throw e;
   }
+  const { error: rememberError } = await supabase.rpc("remember_checkout", { p_reference: payment.reference, p_url: url });
+  if (rememberError) logError("remember_checkout_failed", rememberError, { reference: payment.reference });
   redirect(url);
 }
 

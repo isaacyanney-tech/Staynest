@@ -635,6 +635,7 @@ export type Database = {
       payments: {
         Row: {
           amount: number
+          checkout_url: string | null
           created_at: string
           currency: string
           featured_weeks: number | null
@@ -653,6 +654,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          checkout_url?: string | null
           created_at?: string
           currency: string
           featured_weeks?: number | null
@@ -671,6 +673,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          checkout_url?: string | null
           created_at?: string
           currency?: string
           featured_weeks?: number | null
@@ -1248,9 +1251,14 @@ export type Database = {
           reference: string
         }[]
       }
+      remember_checkout: { Args: { p_reference: string; p_url: string }; Returns: undefined }
       restore_revision_to_draft: {
         Args: { p_revision: number }
         Returns: string
+      }
+      take_rate_limit: {
+        Args: { p_cost?: number; p_key: string; p_max: number; p_window_seconds: number }
+        Returns: boolean
       }
       unpublish_section: { Args: { p_section: string }; Returns: undefined }
       use_featured_slot: { Args: { p_hostel: string }; Returns: string }

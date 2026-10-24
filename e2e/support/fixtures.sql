@@ -69,3 +69,8 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('e2e00000-0000-4000-8000-000000000008', 'rater@e2e.test', '{"full_name":"Akosua Serwaa Frimpong"}');
 insert into public.inspection_requests (hostel_id, student_id, preferred_date, preferred_time, status, owner_response)
 values ('e2e10000-0000-4000-8000-000000000001', 'e2e00000-0000-4000-8000-000000000008', current_date + 1, 'afternoon', 'accepted', 'Come at 2pm.');
+
+-- An owner used only by the duplicate-payment tests, so their purchases do
+-- not change other tests' plan limits.
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('e2e00000-0000-4000-8000-000000000009', 'checkout.owner@e2e.test', '{"full_name":"Kojo Mensah","role":"owner"}');
