@@ -91,4 +91,11 @@ test.describe("hardening", () => {
     // Generous bound: a cold local build on a shared machine, not a benchmark.
     expect(Date.now() - started).toBeLessThan(30_000);
   });
+
+  test("the health check reports the database answering", async ({ request }) => {
+    const res = await request.get("/api/health");
+    expect(res.status()).toBe(200);
+    expect(res.headers()["cache-control"]).toContain("no-store");
+    expect(await res.json()).toMatchObject({ ok: true });
+  });
 });
