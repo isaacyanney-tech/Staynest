@@ -29,7 +29,7 @@ async function Profile() {
   const home = homeFor(viewer.role);
   return (
     <>
-      <Link href={home} className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary">
+      <Link href={home} className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-brand">
         <ArrowLeft className="size-4" aria-hidden /> {viewer.role === "admin" ? "Admin console" : "Dashboard"}
       </Link>
       <div className="mt-3">

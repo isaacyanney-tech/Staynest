@@ -5,6 +5,7 @@ import { ExternalLink, LogOut } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
 import { Wordmark } from "@/components/site/logo";
 import { AdminNav, AdminNavList } from "@/components/admin/admin-nav";
+import { ColorModeToggle } from "@/components/site/color-mode-toggle";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -19,7 +20,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="rounded-sm bg-primary px-1.5 py-0.5 text-xs font-medium text-white">Admin</span>
           </div>
           <div className="flex items-center gap-1">
-            <Link href="/" className="inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-ink/75 hover:text-primary">
+            <ColorModeToggle />
+            <Link href="/" className="inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-ink/75 hover:text-brand">
               <span className="sr-only sm:not-sr-only">View site</span>
               <ExternalLink className="size-4 sm:size-3.5" aria-hidden />
             </Link>

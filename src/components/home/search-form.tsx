@@ -13,7 +13,7 @@ export function HeroSearch({ placeholder, universities }: { placeholder: string;
             name="q"
             type="search"
             placeholder={placeholder || "Search hostels"}
-            className="h-12 w-full rounded-md bg-transparent pl-9 pr-3 text-base text-ink placeholder:text-muted focus:outline-none focus-visible:ring-3 focus-visible:ring-primary/15"
+            className="h-12 w-full rounded-md bg-transparent pl-9 pr-3 text-base text-ink placeholder:text-muted focus:outline-none focus-visible:ring-3 focus-visible:ring-brand/15"
           />
         </label>
         <label className="sm:w-44">
@@ -21,7 +21,7 @@ export function HeroSearch({ placeholder, universities }: { placeholder: string;
           <select
             name="university"
             defaultValue=""
-            className="h-12 w-full rounded-md border border-line bg-sunken px-3 text-[0.9375rem] text-ink focus:outline-none focus-visible:ring-3 focus-visible:ring-primary/15"
+            className="h-12 w-full rounded-md border border-line bg-sunken px-3 text-[0.9375rem] text-ink focus:outline-none focus-visible:ring-3 focus-visible:ring-brand/15"
           >
             <option value="">Any university</option>
             {universities.map((u) => (

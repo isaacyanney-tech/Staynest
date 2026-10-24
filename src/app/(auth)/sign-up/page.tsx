@@ -18,7 +18,7 @@ export default function SignUpPage({ searchParams }: PageProps<"/sign-up">) {
       </Suspense>
       <p className="mt-6 text-center text-sm text-muted">
         Already have an account?{" "}
-        <Link href="/sign-in" className="font-medium text-primary hover:underline">
+        <Link href="/sign-in" className="font-medium text-brand hover:underline">
           Sign in
         </Link>
       </p>

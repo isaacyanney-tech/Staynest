@@ -9,7 +9,7 @@ export function DashboardHeader({ viewer, title, children }: { viewer: Viewer; t
     <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
       <div>
         <p className="text-sm text-muted">{firstName ? `Signed in as ${firstName}` : viewer.email}</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-primary">{title}</h1>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-brand">{title}</h1>
       </div>
       <div className="flex items-center gap-2">
         {children}

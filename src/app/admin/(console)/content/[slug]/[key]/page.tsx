@@ -36,7 +36,7 @@ async function Section({ params }: Pick<PageProps<"/admin/content/[slug]/[key]">
 
   return (
     <>
-      <Link href={`/admin/content/${page.slug}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-ink/75 hover:text-primary">
+      <Link href={`/admin/content/${page.slug}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-ink/75 hover:text-brand">
         <ArrowLeft className="size-4" aria-hidden />
         {PAGE_NAME[page.slug] ?? page.title}
       </Link>

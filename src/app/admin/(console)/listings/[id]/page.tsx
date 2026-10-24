@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: "Review listing · Admin", robots: { 
 export default function AdminListingPage({ params }: PageProps<"/admin/listings/[id]">) {
   return (
     <>
-      <Link href="/admin/listings" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink/75 hover:text-primary">
+      <Link href="/admin/listings" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink/75 hover:text-brand">
         <ArrowLeft className="size-4" aria-hidden />
         Listings
       </Link>
@@ -50,7 +50,7 @@ async function Review({ params }: Pick<PageProps<"/admin/listings/[id]">, "param
     <div className="mt-3 lg:grid lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-8">
       <div className="min-w-0">
         <header className="border-b border-line pb-6">
-          <h1 className="text-3xl font-semibold tracking-tight text-primary">{hostel.name}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-brand">{hostel.name}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-1.5 text-sm">
             <Badge tone={status.tone}>{status.label}</Badge>
             {hostel.is_verified && <Badge tone="verified">Verified</Badge>}
@@ -152,7 +152,7 @@ async function Review({ params }: Pick<PageProps<"/admin/listings/[id]">, "param
                   {hostel.owner.phone}
                 </p>
               )}
-              <Link href={`/admin/users?q=${encodeURIComponent(hostel.owner.full_name)}`} className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
+              <Link href={`/admin/users?q=${encodeURIComponent(hostel.owner.full_name)}`} className="mt-2 inline-block text-sm font-medium text-brand hover:underline">
                 Manage account
               </Link>
             </>
@@ -164,7 +164,7 @@ async function Review({ params }: Pick<PageProps<"/admin/listings/[id]">, "param
           {hostel.verifications.length === 0 ? (
             <p className="text-sm text-ink/75">The owner has not asked to be verified.</p>
           ) : (
-            <Link href={`/admin/verification/${hostel.verifications[0].id}`} className="text-sm font-medium text-primary hover:underline">
+            <Link href={`/admin/verification/${hostel.verifications[0].id}`} className="text-sm font-medium text-brand hover:underline">
               {VERIFICATION_LABEL[hostel.verifications[0].status]} · {formatDate(hostel.verifications[0].submitted_at)}
             </Link>
           )}

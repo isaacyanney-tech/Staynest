@@ -23,7 +23,7 @@ export function Notice({
   className?: string;
 }) {
   const styles = {
-    info: "border-primary/20 bg-primary-soft text-primary",
+    info: "border-brand/20 bg-primary-soft text-brand",
     success: "border-success/25 bg-success-soft text-success",
     warning: "border-warning/25 bg-warning-soft text-warning",
     danger: "border-danger/25 bg-danger-soft text-danger",

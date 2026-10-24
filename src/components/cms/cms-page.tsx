@@ -36,9 +36,9 @@ export async function CmsSections({ slug, sections, updatedAt }: { slug: string;
 
 function Heading({ first, children }: { first: boolean; children: React.ReactNode }) {
   return first ? (
-    <h1 className="text-3xl font-semibold tracking-tight text-primary md:text-[2.75rem] md:leading-tight">{children}</h1>
+    <h1 className="text-3xl font-semibold tracking-tight text-brand md:text-[2.75rem] md:leading-tight">{children}</h1>
   ) : (
-    <h2 className="mt-14 text-2xl font-semibold text-primary">{children}</h2>
+    <h2 className="mt-14 text-2xl font-semibold text-brand">{children}</h2>
   );
 }
 
@@ -85,14 +85,14 @@ function Section({ section, first, contact }: { section: PublishedSection; first
             <dl className="mt-8 grid gap-4 sm:grid-cols-2">
               {contact.email && (
                 <ContactItem icon={<Mail className="size-4" aria-hidden />} label="Email">
-                  <a href={`mailto:${contact.email}`} className="font-medium text-primary hover:underline">
+                  <a href={`mailto:${contact.email}`} className="font-medium text-brand hover:underline">
                     {contact.email}
                   </a>
                 </ContactItem>
               )}
               {contact.phone && (
                 <ContactItem icon={<Phone className="size-4" aria-hidden />} label="Phone">
-                  <a href={`tel:${contact.phone.replace(/\s+/g, "")}`} className="font-medium text-primary hover:underline">
+                  <a href={`tel:${contact.phone.replace(/\s+/g, "")}`} className="font-medium text-brand hover:underline">
                     {contact.phone}
                   </a>
                 </ContactItem>

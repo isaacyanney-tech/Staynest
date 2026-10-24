@@ -52,13 +52,13 @@ async function Overview() {
             <Link
               key={q.label}
               href={q.href}
-              className="group flex items-center justify-between rounded-lg border border-line bg-surface p-5 transition-colors hover:border-primary"
+              className="group flex items-center justify-between rounded-lg border border-line bg-surface p-5 transition-colors hover:border-brand"
             >
               <span>
                 <span className="block text-sm text-muted">{q.label}</span>
-                <span className="mt-1 block font-display text-4xl font-semibold text-primary">{q.value}</span>
+                <span className="mt-1 block font-display text-4xl font-semibold text-brand">{q.value}</span>
               </span>
-              <ArrowRight className="size-5 text-ink/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden />
+              <ArrowRight className="size-5 text-ink/50 transition-transform group-hover:translate-x-0.5 group-hover:text-brand" aria-hidden />
             </Link>
           ))}
         </div>
@@ -67,7 +67,7 @@ async function Overview() {
         {stats.map((s) => (
           <div key={s.label} className="rounded-lg border border-line bg-surface p-4">
             <dt className="text-sm text-muted">
-              <Link href={s.href} className="hover:text-primary hover:underline">
+              <Link href={s.href} className="hover:text-brand hover:underline">
                 {s.label}
               </Link>
             </dt>
@@ -80,7 +80,7 @@ async function Overview() {
           <h2 id="activity-heading" className="text-xl font-semibold">
             Recent activity
           </h2>
-          <Link href="/admin/activity" className="text-sm font-medium text-primary hover:underline">
+          <Link href="/admin/activity" className="text-sm font-medium text-brand hover:underline">
             Full activity log
           </Link>
         </div>

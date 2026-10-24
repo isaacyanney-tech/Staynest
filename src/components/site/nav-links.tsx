@@ -23,9 +23,9 @@ export function NavList({ items, pathname }: { items: Item[]; pathname: string |
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative rounded-md px-3 py-2 text-[0.9375rem] font-medium text-ink/80 transition-colors hover:text-primary",
+                "relative rounded-md px-3 py-2 text-[0.9375rem] font-medium text-ink/80 transition-colors hover:text-brand",
                 "after:absolute after:inset-x-3 after:-bottom-px after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-secondary after:transition-transform after:duration-200 hover:after:scale-x-100",
-                active && "text-primary after:scale-x-100",
+                active && "text-brand after:scale-x-100",
               )}
             >
               {item.label}

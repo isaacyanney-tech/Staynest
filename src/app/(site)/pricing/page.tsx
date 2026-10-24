@@ -21,7 +21,7 @@ export default async function PricingPage() {
     <div className="mx-auto max-w-6xl px-4 pb-24 pt-10 sm:px-6 md:pt-14">
       <div className="max-w-2xl">
         <p className="text-sm font-medium text-secondary-ink">For hostel owners</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-primary md:text-[2.75rem] md:leading-tight">Plans that grow with your hostels</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-brand md:text-[2.75rem] md:leading-tight">Plans that grow with your hostels</h1>
         <p className="mt-4 text-lg leading-relaxed text-muted">
           Students search for free. Owners start on the free plan and upgrade when they list more properties. StayNest never takes a cut of rent.
         </p>
@@ -40,7 +40,7 @@ export default async function PricingPage() {
                 key={plan.id}
                 className={cn(
                   "relative flex flex-col rounded-xl border bg-surface p-6",
-                  isHighlighted ? "border-primary shadow-overlay" : "border-line",
+                  isHighlighted ? "border-brand shadow-overlay" : "border-line",
                 )}
               >
                 {isHighlighted && (
@@ -49,7 +49,7 @@ export default async function PricingPage() {
                 <h2 className="text-xl font-semibold">{plan.name}</h2>
                 <p className="mt-1 min-h-10 text-sm text-muted">{plan.description}</p>
                 <p className="mt-5">
-                  <span className="font-display text-4xl font-semibold tracking-tight text-primary">
+                  <span className="font-display text-4xl font-semibold tracking-tight text-brand">
                     {plan.price === 0 ? "Free" : formatMoney(plan.price, plan.currency)}
                   </span>
                   {plan.price > 0 && <span className="text-sm text-muted"> / {plan.interval}</span>}

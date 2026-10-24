@@ -23,7 +23,7 @@ export function SaveButton({ hostelId, initiallySaved }: { hostelId: string; ini
             setError(result.error ?? null);
           })
         }
-        className="inline-flex h-10 items-center gap-2 rounded-md border border-line-strong bg-surface px-3.5 text-sm font-medium hover:border-primary hover:text-primary"
+        className="inline-flex h-10 items-center gap-2 rounded-md border border-line-strong bg-surface px-3.5 text-sm font-medium hover:border-brand hover:text-brand"
       >
         <Heart
           className={cn("size-4 transition-[fill,color,transform] duration-200", optimistic && "scale-110 fill-danger text-danger")}

@@ -67,7 +67,7 @@ async function StudentDashboard() {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       {r.hostels ? (
-                        <Link href={`/hostels/${r.hostels.slug}`} className="font-semibold hover:text-primary hover:underline">
+                        <Link href={`/hostels/${r.hostels.slug}`} className="font-semibold hover:text-brand hover:underline">
                           {r.hostels.name}
                         </Link>
                       ) : (
@@ -114,7 +114,7 @@ async function StudentDashboard() {
               s.hostels ? (
                 <li key={s.hostels.id} className="rounded-lg border border-line bg-surface p-4">
                   {s.hostels.status === "published" ? (
-                    <Link href={`/hostels/${s.hostels.slug}`} className="font-semibold hover:text-primary hover:underline">
+                    <Link href={`/hostels/${s.hostels.slug}`} className="font-semibold hover:text-brand hover:underline">
                       {s.hostels.name}
                     </Link>
                   ) : (

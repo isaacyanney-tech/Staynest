@@ -47,7 +47,7 @@ async function Queue({ searchParams }: Pick<PageProps<"/admin/verification">, "s
           {rows.map((r) => (
             <li key={r.id} className="relative flex flex-wrap items-center justify-between gap-3 p-4 hover:bg-sunken/50">
               <div>
-                <Link href={`/admin/verification/${r.id}`} className="font-semibold text-primary after:absolute after:inset-0 hover:underline">
+                <Link href={`/admin/verification/${r.id}`} className="font-semibold text-brand after:absolute after:inset-0 hover:underline">
                   {r.hostel?.name ?? "Deleted listing"}
                 </Link>
                 <p className="text-sm text-ink/70">

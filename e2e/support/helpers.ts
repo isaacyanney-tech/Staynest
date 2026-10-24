@@ -8,8 +8,13 @@ export const users = {
   admin: "admin@e2e.test",
 };
 
-/** Fails on any WCAG 2.1 A/AA violation. */
+/**
+ * Fails on any WCAG 2.1 A/AA violation. Contrast is measured on the settled
+ * page: reduced motion shows scroll-revealed headings at full opacity, as they
+ * end up once a visitor scrolls to them.
+ */
 export async function expectAccessible(page: Page) {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   // Let entrance animations settle so contrast is measured at full opacity.
   // Scroll-driven animations never "finish", so only time-based ones are awaited.
   await page.evaluate(() =>
@@ -21,6 +26,7 @@ export async function expectAccessible(page: Page) {
     ),
   );
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+  await page.emulateMedia({ reducedMotion: null });
   const summary = results.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(" ")).slice(0, 3).join(", ")})`);
   expect(summary, "axe violations").toEqual([]);
 }

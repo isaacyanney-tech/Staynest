@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
       <AuthHeading title="Reset your password">Enter your email and we will send you a link to choose a new password.</AuthHeading>
       <ForgotPasswordForm />
       <p className="mt-6 text-center text-sm text-muted">
-        <Link href="/sign-in" className="font-medium text-primary hover:underline">
+        <Link href="/sign-in" className="font-medium text-brand hover:underline">
           Back to sign in
         </Link>
       </p>

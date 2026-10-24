@@ -29,7 +29,7 @@ function SignInFields({ action, next, admin = false }: { action: Action; next?: 
         error={err.password}
         hint={
           admin ? undefined : (
-            <Link href="/forgot-password" className="font-medium text-primary hover:underline">
+            <Link href="/forgot-password" className="font-medium text-brand hover:underline">
               Forgot your password?
             </Link>
           )
@@ -83,12 +83,12 @@ export function SignUpForm({ next, initialRole }: { next?: string; initialRole: 
             <label
               key={o.value}
               className={cn(
-                "relative flex cursor-pointer flex-col gap-1 rounded-lg border bg-surface p-3 transition-colors has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-primary/20",
-                role === o.value ? "border-primary bg-primary-soft/60" : "border-line-strong hover:border-muted",
+                "relative flex cursor-pointer flex-col gap-1 rounded-lg border bg-surface p-3 transition-colors has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-brand/20",
+                role === o.value ? "border-brand bg-primary-soft/60" : "border-line-strong hover:border-muted",
               )}
             >
               <input type="radio" name="role" value={o.value} defaultChecked={role === o.value} onChange={() => setRole(o.value)} className="sr-only" />
-              <o.icon className={cn("size-5", role === o.value ? "text-primary" : "text-muted")} aria-hidden />
+              <o.icon className={cn("size-5", role === o.value ? "text-brand" : "text-muted")} aria-hidden />
               <span className="text-sm font-semibold">{o.label}</span>
               <span className="text-xs leading-snug text-muted">{o.body}</span>
             </label>
@@ -114,11 +114,11 @@ export function SignUpForm({ next, initialRole }: { next?: string; initialRole: 
           label={
             <span className="text-sm">
               I agree to the{" "}
-              <Link href="/terms" className="font-medium text-primary underline" target="_blank">
+              <Link href="/terms" className="font-medium text-brand underline" target="_blank">
                 terms
               </Link>{" "}
               and{" "}
-              <Link href="/privacy" className="font-medium text-primary underline" target="_blank">
+              <Link href="/privacy" className="font-medium text-brand underline" target="_blank">
                 privacy policy
               </Link>
               .

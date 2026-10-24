@@ -75,7 +75,7 @@ async function Activity({ searchParams }: Pick<PageProps<"/admin/activity">, "se
                     {link && (
                       <>
                         {" "}
-                        <Link href={link} className="font-medium text-primary hover:underline">
+                        <Link href={link} className="font-medium text-brand hover:underline">
                           Open
                         </Link>
                       </>

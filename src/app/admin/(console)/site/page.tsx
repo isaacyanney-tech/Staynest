@@ -128,7 +128,7 @@ function SmallButton({ op, label, disabled, danger, children }: { op: string; la
       className={
         danger
           ? "inline-flex size-9 items-center justify-center rounded-md border border-line text-danger hover:border-danger hover:bg-danger-soft"
-          : "inline-flex size-9 items-center justify-center rounded-md border border-line text-ink/75 hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+          : "inline-flex size-9 items-center justify-center rounded-md border border-line text-ink/75 hover:border-brand hover:text-brand disabled:pointer-events-none disabled:opacity-40"
       }
     >
       {children}

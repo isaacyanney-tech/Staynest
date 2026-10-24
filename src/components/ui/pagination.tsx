@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 /** Previous/next links with a page count; hrefFor builds each page's URL. */
 export function Pagination({ page, pages, hrefFor }: { page: number; pages: number; hrefFor: (page: number) => string }) {
   if (pages <= 1) return null;
-  const link = "inline-flex h-10 items-center gap-1 rounded-md border border-line-strong bg-surface px-3 text-sm font-medium hover:border-primary hover:text-primary";
+  const link = "inline-flex h-10 items-center gap-1 rounded-md border border-line-strong bg-surface px-3 text-sm font-medium hover:border-brand hover:text-brand";
   const off = "pointer-events-none opacity-45";
   return (
     <nav aria-label="Pagination" className="flex items-center justify-between gap-4">

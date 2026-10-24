@@ -24,7 +24,7 @@ export const metadata: Metadata = { title: "Edit listing", robots: { index: fals
 export default function EditHostelPage({ params, searchParams }: PageProps<"/dashboard/owner/hostels/[id]">) {
   return (
     <div className="mx-auto max-w-4xl px-4 pb-20 pt-10 sm:px-6">
-      <Link href="/dashboard/owner" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-primary">
+      <Link href="/dashboard/owner" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-brand">
         <ArrowLeft className="size-4" aria-hidden />
         Your hostels
       </Link>
@@ -55,7 +55,7 @@ async function Editor({ params, searchParams }: Props) {
     <>
       <header className="mt-3 flex flex-wrap items-start justify-between gap-4 border-b border-line pb-6">
         <div className="min-w-0">
-          <h1 className="text-3xl font-semibold tracking-tight text-primary">{hostel.name}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-brand">{hostel.name}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <Badge tone={status.tone}>{status.label}</Badge>
             {hostel.is_verified && <Badge tone="verified">Verified</Badge>}
@@ -92,7 +92,7 @@ async function Editor({ params, searchParams }: Props) {
             ["#verification", "Verification"],
           ].map(([href, label]) => (
             <li key={href}>
-              <a href={href} className="inline-block whitespace-nowrap px-3 py-3 text-muted hover:text-primary">
+              <a href={href} className="inline-block whitespace-nowrap px-3 py-3 text-muted hover:text-brand">
                 {label}
               </a>
             </li>
@@ -137,7 +137,7 @@ async function Editor({ params, searchParams }: Props) {
                 </p>
                 <div className="mt-3 flex flex-wrap items-start gap-x-4 gap-y-2">
                   <details className="group w-full sm:w-auto sm:flex-1">
-                    <summary className="cursor-pointer text-sm font-medium text-primary">Edit {room.name}</summary>
+                    <summary className="cursor-pointer text-sm font-medium text-brand">Edit {room.name}</summary>
                     <div className="mt-4">
                       <RoomForm hostelId={hostel.id} room={room} />
                     </div>
@@ -208,7 +208,7 @@ async function Editor({ params, searchParams }: Props) {
                     </form>
                   </div>
                   <details>
-                    <summary className="cursor-pointer text-sm font-medium text-primary">Edit description of photo {index + 1}</summary>
+                    <summary className="cursor-pointer text-sm font-medium text-brand">Edit description of photo {index + 1}</summary>
                     <div className="mt-3">
                       <PhotoDetailsForm hostelId={hostel.id} photo={photo} />
                     </div>
@@ -297,9 +297,9 @@ function PhotoAction({
 function StatusPanel({ hostel, checks, ready }: { hostel: OwnerHostel; checks: { done: boolean; label: string; href: string }[]; ready: boolean }) {
   if (hostel.status === "pending_review") {
     return (
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/20 bg-primary-soft p-5">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-brand/20 bg-primary-soft p-5">
         <div>
-          <p className="font-semibold text-primary">Waiting for review</p>
+          <p className="font-semibold text-brand">Waiting for review</p>
           <p className="mt-0.5 text-sm text-ink/80">We usually review listings within two working days. You can keep editing while you wait.</p>
         </div>
         <form action={withdrawFromReview}>
@@ -343,7 +343,7 @@ function StatusPanel({ hostel, checks, ready }: { hostel: OwnerHostel; checks: {
                 <span className="sr-only"> (done)</span>
               </span>
             ) : (
-              <a href={c.href} className="text-primary underline-offset-2 hover:underline">
+              <a href={c.href} className="text-brand underline-offset-2 hover:underline">
                 {c.label}
                 <span className="sr-only"> (still needed)</span>
               </a>
