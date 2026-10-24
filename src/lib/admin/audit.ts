@@ -68,6 +68,10 @@ export function describeAudit(e: Pick<AuditEntry, "action" | "entity" | "details
       return "Unpublished a content section";
     case "content.reverted":
       return "Restored an earlier version of a content section";
+    case "rating.hidden":
+      return str(d.reason) ? `Hid a student rating (${d.reason})` : "Hid a student rating";
+    case "rating.shown":
+      return "Made a hidden rating visible again";
   }
   const [table, op] = e.action.split(".");
   const noun = TABLE[table] ?? table.replace(/_/g, " ");

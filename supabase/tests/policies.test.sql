@@ -300,7 +300,7 @@ select tests.act_as(null);
 select tests.throws('anonymous cannot read drafts',
   $$select 1 / (select count(*) from public.page_section_drafts)$$);
 select tests.is('anonymous can read published homepage sections',
-  (select count(*) from public.page_sections s join public.pages p on p.id = s.page_id where p.slug = 'home')::int, 6);
+  (select count(*) from public.page_sections s join public.pages p on p.id = s.page_id where p.slug = 'home')::int, 7);
 select tests.throws('anonymous cannot publish', $$select public.publish_section(gen_random_uuid())$$);
 select tests.is('anonymous cannot read private business settings',
   (select count(*) from public.business_settings where key = 'inspections.max_open_per_student')::int, 0);
@@ -446,5 +446,73 @@ select tests.throws('student cannot list accounts', $$select * from public.admin
 select tests.act_as(null);
 select tests.throws('anonymous cannot list accounts', $$select * from public.admin_list_users()$$);
 select tests.reset_role();
+
+-- ---------------------------------------------------------------- ratings
+-- student2 has an open (not yet accepted) request for owner-one-hostel.
+select tests.act_as('00000000-0000-0000-0000-0000000000b2');
+select tests.throws('student cannot rate before the owner accepts',
+  $$insert into public.hostel_ratings (hostel_id, student_id, stars)
+    select id, auth.uid(), 5 from public.hostels where slug = 'owner-one-hostel'$$, '42501');
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+update public.inspection_requests set status = 'accepted'
+ where student_id = '00000000-0000-0000-0000-0000000000b2'
+   and hostel_id = (select id from public.hostels where slug = 'owner-one-hostel');
+select tests.throws('owner cannot rate their own hostel',
+  $$insert into public.hostel_ratings (hostel_id, student_id, stars)
+    select id, auth.uid(), 5 from public.hostels where slug = 'owner-one-hostel'$$);
+select tests.act_as('00000000-0000-0000-0000-0000000000b2');
+insert into public.hostel_ratings (hostel_id, student_id, stars, comment, is_hidden)
+select id, auth.uid(), 4, '  Clean rooms, water is steady.  ', true from public.hostels where slug = 'owner-one-hostel';
+select tests.is('accepted student can rate, and cannot pre-hide it',
+  (select is_hidden from public.hostel_ratings where student_id = auth.uid()), false);
+select tests.is('comment is trimmed',
+  (select comment from public.hostel_ratings where student_id = auth.uid()), 'Clean rooms, water is steady.');
+select tests.is('rollup sets the average',
+  (select rating_avg from public.hostels where slug = 'owner-one-hostel'), 4.00::numeric);
+select tests.throws('one rating per student per hostel',
+  $$insert into public.hostel_ratings (hostel_id, student_id, stars)
+    select id, auth.uid(), 2 from public.hostels where slug = 'owner-one-hostel'$$, '23505');
+update public.hostel_ratings set stars = 2 where student_id = auth.uid();
+select tests.is('student can change their rating',
+  (select rating_avg from public.hostels where slug = 'owner-one-hostel'), 2.00::numeric);
+select tests.throws('student cannot rate as someone else',
+  $$insert into public.hostel_ratings (hostel_id, student_id, stars)
+    select id, '00000000-0000-0000-0000-0000000000b1', 5 from public.hostels where slug = 'owner-one-hostel'$$);
+select tests.throws('student cannot rate an illustrative listing',
+  $$insert into public.hostel_ratings (hostel_id, student_id, stars)
+    select id, auth.uid(), 5 from public.hostels where slug = 'demo-legon-courtyard'$$);
+select tests.throws('stars stay between 1 and 5',
+  $$update public.hostel_ratings set stars = 6 where student_id = auth.uid()$$, '23514');
+select tests.act_as('00000000-0000-0000-0000-0000000000b1');
+select tests.throws('cancelled request does not allow rating',
+  $$insert into public.hostel_ratings (hostel_id, student_id, stars)
+    select id, auth.uid(), 5 from public.hostels where slug = 'owner-one-hostel'$$, '42501');
+update public.hostel_ratings set stars = 5;
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+update public.hostels set rating_avg = 5, rating_count = 99 where slug = 'owner-one-hostel';
+select tests.is('owner cannot overwrite rating rollup',
+  (select rating_count from public.hostels where slug = 'owner-one-hostel'), 1);
+select tests.act_as('00000000-0000-0000-0000-0000000000b2');
+update public.profiles set full_name = 'Ama Kwarteng Boateng' where id = auth.uid();
+update public.hostel_ratings set comment = 'Clean rooms.' where student_id = auth.uid();
+select tests.act_as(null);
+select tests.is('visitors see the rating with first name and initial',
+  (select reviewer_name from public.hostel_ratings), 'Ama B.');
+select tests.reset_role();
+select tests.act_as('00000000-0000-0000-0000-00000000000a');
+update public.hostel_ratings set is_hidden = true, hidden_reason = 'Abusive';
+select tests.act_as(null);
+select tests.is('hidden ratings disappear for visitors',
+  (select count(*) from public.hostel_ratings)::int, 0);
+select tests.reset_role();
+select tests.is('hidden ratings leave the average',
+  (select rating_count from public.hostels where slug = 'owner-one-hostel'), 0);
+select tests.is('admin hide is audited',
+  (select count(*) from public.audit_log where action = 'rating.hidden')::int, 1);
+select tests.act_as('00000000-0000-0000-0000-0000000000b2');
+update public.hostel_ratings set is_hidden = false;
+select tests.reset_role();
+select tests.is('student cannot unhide',
+  (select is_hidden from public.hostel_ratings), true);
 
 \echo 'All policy tests passed'

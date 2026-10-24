@@ -14,8 +14,10 @@ test.describe("university pages and search engine files", () => {
     await page.goto("/universities/knust");
     await expect(page.getByRole("heading", { level: 1, name: "Student hostels near KNUST" })).toBeVisible();
     await expect(page).toHaveTitle(/Student hostels near KNUST/);
-    await expect(page.locator("head meta[name='description']")).toHaveAttribute("content", /Compare hostels near/);
-    await expect(page.locator("head link[rel='canonical']")).toHaveAttribute("href", /\/universities\/knust$/);
+    // Next streams metadata after the page shell for browsers (search engine
+    // crawlers get it in <head>), so these are looked up anywhere in the page.
+    await expect(page.locator("meta[name='description']")).toHaveAttribute("content", /Compare hostels near/);
+    await expect(page.locator("link[rel='canonical']")).toHaveAttribute("href", /\/universities\/knust$/);
     await expect(page.getByRole("link", { name: /Ayeduase Billing House/ })).toBeVisible();
     await expectAccessible(page);
     await screenshot(page, `university-${info.project.name}`);

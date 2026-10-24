@@ -86,6 +86,11 @@ async function StudentDashboard() {
                       </p>
                     )}
                     {r.owner_response && <p className="mt-2 rounded-md bg-sunken px-3 py-2 text-sm">“{r.owner_response}”</p>}
+                    {(r.status === "accepted" || r.status === "completed") && r.hostels && (
+                      <Link href={`/hostels/${r.hostels.slug}#ratings-heading`} className="mt-2 inline-flex text-sm font-medium text-brand hover:underline">
+                        Rate this hostel
+                      </Link>
+                    )}
                   </div>
                   {open && (
                     <form action={cancelInspection}>

@@ -41,6 +41,12 @@ export const featuredHostelsSchema = z.object({
   limit: z.number().int().min(1).max(12).default(6),
 });
 
+export const ratingsSchema = z.object({
+  heading: required(100),
+  subheading: text(240),
+  limit: z.number().int().min(1).max(12).default(6),
+});
+
 export const howItWorksSchema = z.object({
   heading: required(100),
   steps: z.array(z.object({ title: required(80), body: text(300) })).min(1).max(6),
@@ -84,6 +90,7 @@ export const SECTION_SCHEMAS = {
   popular_universities: popularUniversitiesSchema,
   featured_hostels: featuredHostelsSchema,
   how_it_works: howItWorksSchema,
+  ratings: ratingsSchema,
   trust: trustSchema,
   cta: ctaSchema,
   faq: faqSchema,

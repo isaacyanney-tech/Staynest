@@ -63,3 +63,9 @@ select 'e2e10000-0000-4000-8000-000000000004', 'ayeduase-billing-house', 'Ayedua
 from public.universities u where u.slug = 'knust';
 insert into public.room_types (hostel_id, name, occupancy, price_amount, price_period, total_rooms, available_rooms, sort_order)
 values ('e2e10000-0000-4000-8000-000000000004', 'Single room', 1, 6400, 'academic_year', 6, 2, 1);
+
+-- A student whose inspection the owner accepted, so they may rate the hostel.
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('e2e00000-0000-4000-8000-000000000008', 'rater@e2e.test', '{"full_name":"Akosua Serwaa Frimpong"}');
+insert into public.inspection_requests (hostel_id, student_id, preferred_date, preferred_time, status, owner_response)
+values ('e2e10000-0000-4000-8000-000000000001', 'e2e00000-0000-4000-8000-000000000008', current_date + 1, 'afternoon', 'accepted', 'Come at 2pm.');

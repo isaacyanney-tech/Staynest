@@ -3,6 +3,9 @@ import { ArrowRight, CalendarCheck, FileCheck2, Search, ShieldCheck } from "luci
 import type { SectionContent } from "@/lib/cms/schemas";
 import type { HostelCard as Card, University } from "@/lib/hostels/queries";
 import type { MediaRef } from "@/lib/cms/queries";
+import type { RecentRating } from "@/lib/hostels/ratings";
+import { Stars } from "@/components/ratings/stars";
+import { formatDate } from "@/lib/format";
 import { LinkButton } from "@/components/ui/button";
 import { HostelCard } from "@/components/hostels/hostel-card";
 import { SafeImage } from "@/components/hostels/safe-image";
@@ -10,7 +13,6 @@ import { HeroScene } from "./hero-scene";
 import { HeroTilt } from "./hero-tilt";
 import { HeroWaves } from "./hero-waves";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
-import { PointerSpotlight } from "@/components/motion/pointer-spotlight";
 import { HeroSearch } from "./search-form";
 
 export function Hero({
@@ -128,7 +130,6 @@ export function PopularUniversities({ content, universities }: { content: Sectio
   return (
     <section className="mx-auto max-w-7xl px-4 pt-20 sm:px-6">
       <SectionHeading heading={content.heading} subheading={content.subheading} />
-      <PointerSpotlight />
       <ul className="grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
         {chosen.map((u) => (
           <li key={u.slug} className="bg-surface">
@@ -178,6 +179,40 @@ export function FeaturedHostels({ content, hostels }: { content: SectionContent<
           <HostelCard key={h.id} hostel={h} />
         ))}
       </div>
+    </section>
+  );
+}
+
+export function RecentRatings({ content, ratings }: { content: SectionContent<"ratings">; ratings: RecentRating[] }) {
+  // Nothing to show until real students have rated; no placeholder reviews.
+  if (ratings.length === 0) return null;
+  return (
+    <section className="mx-auto max-w-7xl px-4 pt-20 sm:px-6">
+      <SectionHeading heading={content.heading} subheading={content.subheading} />
+      <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {ratings.map((r, i) => (
+          <li key={r.id} className="reveal" style={{ animationDelay: `${(i % 3) * 80}ms` }}>
+            <figure
+              data-spotlight
+              className="spotlight group flex h-full flex-col rounded-xl border border-line bg-surface p-6 transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-line-strong hover:shadow-overlay"
+            >
+              <Stars value={r.stars} size={18} />
+              <span className="sr-only">{r.stars} out of 5 stars.</span>
+              <blockquote className="mt-4 flex-1 leading-relaxed text-ink/90">
+                <p>{r.comment}</p>
+              </blockquote>
+              <figcaption className="mt-5 border-t border-line pt-4 text-sm">
+                <span className="font-medium text-ink">{r.reviewer}</span>
+                <span className="text-muted"> on </span>
+                <Link href={`/hostels/${r.hostel.slug}`} className="relative z-10 font-medium text-brand underline-offset-4 hover:underline">
+                  {r.hostel.name}
+                </Link>
+                <span className="block text-muted">{formatDate(r.createdAt)}</span>
+              </figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
