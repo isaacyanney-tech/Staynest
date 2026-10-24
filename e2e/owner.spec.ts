@@ -106,6 +106,18 @@ test.describe("owner listing editor", () => {
     await expect(page.getByText("3 of 6 available")).toBeVisible();
     await expect(page.getByText("GHS 4,800")).toBeVisible();
 
+    // Changing the billing period sticks, and saving the room again keeps it.
+    await page.getByText("Edit Two in a room").click();
+    const editRoom = page.locator("form").filter({ has: page.getByRole("button", { name: "Save room" }) });
+    await editRoom.getByLabel("Charged").selectOption("semester");
+    await editRoom.getByRole("button", { name: "Save room" }).click();
+    await expect(page.getByText("Room updated.")).toBeVisible();
+    await expect(editRoom.getByLabel("Charged")).toHaveValue("semester");
+    await editRoom.getByLabel("Price per person (GHS)").fill("2500");
+    await editRoom.getByRole("button", { name: "Save room" }).click();
+    await expect(page.getByText("GHS 2,500")).toBeVisible();
+    await expect(editRoom.getByLabel("Charged")).toHaveValue("semester");
+
     // Photos: a file that only claims to be a JPEG is refused.
     const upload = page.locator("form").filter({ has: page.getByRole("button", { name: "Upload photo" }) });
     await upload.getByLabel("Photo", { exact: true }).setInputFiles({ name: "room.jpg", mimeType: "image/jpeg", buffer: Buffer.from("<html>not a photo</html>") });

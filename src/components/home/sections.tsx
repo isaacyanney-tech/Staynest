@@ -107,7 +107,7 @@ export function PopularUniversities({ content, universities }: { content: Sectio
         {chosen.map((u) => (
           <li key={u.slug} className="bg-surface">
             <Link
-              href={`/hostels?university=${u.slug}`}
+              href={`/universities/${u.slug}`}
               className="group flex h-full flex-col justify-between gap-6 p-5 transition-colors hover:bg-primary-soft/60"
             >
               <div>

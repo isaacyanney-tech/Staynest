@@ -1,5 +1,5 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { saveRoom } from "@/lib/actions/owner";
 import { PERIOD_LABEL } from "@/lib/format";
 import { idle } from "@/lib/forms";
@@ -25,6 +25,13 @@ export function RoomForm({ hostelId, room }: { hostelId: string; room?: RoomForm
   const sent = state.status === "error" ? state.values : undefined;
   const prefix = room ? `room-${room.id}-` : "new-room-";
   const v = (key: string, fallback: string) => sent?.[key] ?? fallback;
+  // React resets the form after each save, and a select goes back to the option
+  // it first rendered with, not the period just saved. Put the saved one back.
+  const periodRef = useRef<HTMLSelectElement>(null);
+  const period = v("period", room?.price_period ?? "academic_year");
+  useEffect(() => {
+    if (periodRef.current) periodRef.current.value = period;
+  }, [state, period]);
 
   return (
     <form action={action} className="space-y-4" noValidate>
@@ -45,7 +52,7 @@ export function RoomForm({ hostelId, room }: { hostelId: string; room?: RoomForm
         </Field>
         <Field label="Charged" name="period" idPrefix={prefix} error={err.period}>
           {(p) => (
-            <Select {...p} name="period" defaultValue={v("period", room?.price_period ?? "academic_year")}>
+            <Select {...p} ref={periodRef} name="period" defaultValue={period}>
               {Object.entries(PERIOD_LABEL).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label[0].toUpperCase() + label.slice(1)}

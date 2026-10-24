@@ -61,6 +61,8 @@ test.describe("accounts and roles", () => {
     await expect(page.getByRole("button", { name: "Saved" })).toHaveAttribute("aria-pressed", "true");
 
     const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+    await expect(page.getByRole("radio", { name: /Not sure yet/ })).toBeChecked();
+    await page.getByRole("radio", { name: /Two in a room/ }).check();
     await page.getByLabel("Preferred date").fill(tomorrow);
     await page.getByLabel("Time").selectOption("afternoon");
     await page.getByLabel(/Message to the owner/).fill("Is there water storage?");
@@ -71,6 +73,7 @@ test.describe("accounts and roles", () => {
     await expect(page).toHaveURL(/\/dashboard\/student$/);
     const request = page.locator("li").filter({ hasText: "Okponglo Test House" }).first();
     await expect(request.getByText("Waiting for owner")).toBeVisible();
+    await expect(request.getByText(/Two in a room/)).toBeVisible();
     await expect(page.getByRole("heading", { name: "Saved hostels" })).toBeVisible();
     await expectAccessible(page);
 

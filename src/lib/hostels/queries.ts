@@ -273,3 +273,19 @@ export async function getUniversities(): Promise<University[]> {
     hostelCount: tally.get(u.id) ?? 0,
   }));
 }
+
+/** Published, non-sample hostels for the sitemap. */
+export async function getSitemapHostels(): Promise<{ slug: string; updatedAt: string }[]> {
+  "use cache";
+  cacheTag(HOSTELS_TAG, "sitemap");
+  cacheLife("hours");
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("hostels")
+    .select("slug, updated_at")
+    .eq("status", "published")
+    .eq("is_demo", false)
+    .order("updated_at", { ascending: false })
+    .limit(5000);
+  return (data ?? []).map((h) => ({ slug: h.slug, updatedAt: h.updated_at }));
+}
