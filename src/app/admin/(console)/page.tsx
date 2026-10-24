@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArrowRight } from "lucide-react";
+import { BadgeCheck, Building2, ClipboardList, GraduationCap, House, Star } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardSkeleton } from "@/components/dashboard/shell";
-import { AdminPageHeader } from "@/components/admin/page-header";
+import { DashboardHeader, DashboardSkeleton } from "@/components/dashboard/shell";
 import { RecentActivity } from "@/components/admin/recent-activity";
 
 export const metadata: Metadata = { title: "Admin", robots: { index: false, follow: false } };
@@ -22,56 +21,75 @@ async function Overview() {
   const viewer = await requireRole(["admin"], "admin");
   const supabase = await createClient();
   const count = async (q: PromiseLike<{ count: number | null }>) => (await q).count ?? 0;
-  const [pending, published, verifications, students, owners] = await Promise.all([
+  const [pending, published, verifications, students, owners, ratings, hiddenRatings] = await Promise.all([
     count(supabase.from("hostels").select("id", { count: "exact", head: true }).eq("status", "pending_review")),
     count(supabase.from("hostels").select("id", { count: "exact", head: true }).eq("status", "published").eq("is_demo", false)),
     count(supabase.from("verification_applications").select("id", { count: "exact", head: true }).eq("status", "pending")),
     count(supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student")),
     count(supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "owner")),
+    count(supabase.from("hostel_ratings").select("id", { count: "exact", head: true })),
+    count(supabase.from("hostel_ratings").select("id", { count: "exact", head: true }).eq("is_hidden", true)),
   ]);
-  const queues = [
-    { label: "Listings waiting for review", value: pending, href: "/admin/listings" },
-    { label: "Verification requests to review", value: verifications, href: "/admin/verification" },
-  ];
+  const waiting = pending + verifications;
   const stats = [
-    { label: "Published listings", value: published, href: "/admin/listings?status=published" },
-    { label: "Students", value: students, href: "/admin/users?role=student" },
-    { label: "Owners", value: owners, href: "/admin/users?role=owner" },
+    { label: "Students", value: students, icon: GraduationCap, href: "/admin/users?role=student" },
+    { label: "Owners", value: owners, icon: House, href: "/admin/users?role=owner" },
+    {
+      label: "Student ratings",
+      value: ratings,
+      hint: hiddenRatings ? `${hiddenRatings} hidden` : undefined,
+      icon: Star,
+      href: "/admin/ratings",
+    },
   ];
-  const firstName = viewer.fullName.split(" ")[0];
 
   return (
     <>
-      <AdminPageHeader title="Overview" description={firstName ? `Signed in as ${firstName}.` : `Signed in as ${viewer.email}.`} />
-      <section aria-labelledby="queues-heading" className="mt-8">
-        <h2 id="queues-heading" className="sr-only">
-          Waiting for you
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {queues.map((q) => (
-            <Link
-              key={q.label}
-              href={q.href}
-              className="group flex items-center justify-between rounded-lg border border-line bg-surface p-5 transition-colors hover:border-brand"
-            >
-              <span>
-                <span className="block text-sm text-muted">{q.label}</span>
-                <span className="mt-1 block font-display text-4xl font-semibold text-brand">{q.value}</span>
-              </span>
-              <ArrowRight className="size-5 text-ink/50 transition-transform group-hover:translate-x-0.5 group-hover:text-brand" aria-hidden />
-            </Link>
-          ))}
-        </div>
-      </section>
-      <dl className="mt-3 grid grid-cols-3 gap-3">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-lg border border-line bg-surface p-4">
+      <DashboardHeader
+        viewer={viewer}
+        role="Administrator"
+        title="Overview"
+        showSignOut={false}
+        subtitle={
+          waiting ? `${waiting} item${waiting === 1 ? " is" : "s are"} waiting for a decision.` : "Nothing is waiting for review."
+        }
+        stats={[
+          {
+            label: "Listings waiting for review",
+            value: pending,
+            icon: ClipboardList,
+            href: "/admin/listings",
+            tone: pending ? "attention" : "default",
+          },
+          {
+            label: "Verification requests to review",
+            value: verifications,
+            icon: BadgeCheck,
+            href: "/admin/verification",
+            tone: verifications ? "attention" : "default",
+          },
+          { label: "Published listings", value: published, icon: Building2, href: "/admin/listings?status=published" },
+          ...stats.slice(2),
+        ]}
+      />
+      <dl className="mt-4 grid grid-cols-2 gap-3">
+        {stats.slice(0, 2).map((s) => (
+          <div
+            key={s.label}
+            className="spotlight relative rounded-xl border border-line bg-surface py-4 pl-[4.5rem] pr-4 transition-[border-color,translate] hover:-translate-y-0.5 hover:border-brand has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-brand"
+          >
             <dt className="text-sm text-muted">
-              <Link href={s.href} className="hover:text-brand hover:underline">
+              <span
+                className="absolute left-4 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-lg bg-sunken text-brand"
+                aria-hidden
+              >
+                <s.icon className="size-5" />
+              </span>
+              <Link href={s.href} className="outline-none after:absolute after:inset-0 after:rounded-xl">
                 {s.label}
               </Link>
             </dt>
-            <dd className="mt-1 font-display text-2xl font-semibold">{s.value}</dd>
+            <dd className="font-display text-2xl font-semibold">{s.value}</dd>
           </div>
         ))}
       </dl>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { CalendarDays } from "lucide-react";
+import { CalendarCheck, CalendarDays, Clock, Heart, Star } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { cancelInspection } from "@/lib/actions/students";
@@ -28,10 +28,12 @@ const TIME_LABEL: Record<string, string> = { morning: "Morning", afternoon: "Aft
 async function StudentDashboard() {
   const viewer = await requireRole(["student"]);
   const supabase = await createClient();
-  const [{ data: requests }, { data: saved }] = await Promise.all([
+  const [{ data: requests }, { data: saved }, { count: ratingCount }] = await Promise.all([
     supabase
       .from("inspection_requests")
-      .select("id, status, preferred_date, preferred_time, proposed_date, owner_response, created_at, hostels(slug, name, area), room_types(name)")
+      .select(
+        "id, status, preferred_date, preferred_time, proposed_date, owner_response, created_at, hostels(slug, name, area), room_types(name)",
+      )
       .eq("student_id", viewer.id)
       .order("created_at", { ascending: false })
       .limit(50),
@@ -40,12 +42,47 @@ async function StudentDashboard() {
       .select("created_at, hostels(id, slug, name, area, price_from, status)")
       .eq("user_id", viewer.id)
       .order("created_at", { ascending: false }),
+    supabase.from("hostel_ratings").select("id", { count: "exact", head: true }).eq("student_id", viewer.id),
   ]);
+
+  const waiting = requests?.filter((r) => r.status === "requested" || r.status === "rescheduled").length ?? 0;
+  const accepted = requests?.filter((r) => r.status === "accepted").length ?? 0;
+  const today = new Date().toISOString().slice(0, 10);
+  const next = requests
+    ?.filter((r) => r.status === "accepted" && r.preferred_date >= today)
+    .sort((a, b) => a.preferred_date.localeCompare(b.preferred_date))[0];
 
   return (
     <>
-      <DashboardHeader viewer={viewer} title="Your hostel search">
-        <LinkButton href="/hostels" variant="outline">
+      <DashboardHeader
+        viewer={viewer}
+        role="Student"
+        title="Your hostel search"
+        subtitle={
+          next?.hostels ? (
+            <>
+              Next inspection: <strong className="font-semibold text-white">{next.hostels.name}</strong> on{" "}
+              {formatDate(next.preferred_date, { dateStyle: "full" })},{" "}
+              {(TIME_LABEL[next.preferred_time] ?? next.preferred_time).toLowerCase()}.
+            </>
+          ) : (
+            "Request inspections, track owner replies and keep the hostels you like in one place."
+          )
+        }
+        stats={[
+          {
+            label: "Waiting on owners",
+            value: waiting,
+            icon: Clock,
+            href: "#inspections-heading",
+            tone: waiting ? "attention" : "default",
+          },
+          { label: "Accepted", value: accepted, icon: CalendarCheck, href: "#inspections-heading" },
+          { label: "Saved hostels", value: saved?.length ?? 0, icon: Heart, href: "#saved-heading" },
+          { label: "Ratings given", value: ratingCount ?? 0, icon: Star },
+        ]}
+      >
+        <LinkButton href="/hostels" variant="accent">
           Find hostels
         </LinkButton>
       </DashboardHeader>
@@ -55,7 +92,11 @@ async function StudentDashboard() {
           Inspection requests
         </h2>
         {!requests?.length ? (
-          <EmptyState className="mt-4" title="No inspection requests yet" action={<LinkButton href="/hostels">Browse hostels</LinkButton>}>
+          <EmptyState
+            className="mt-4"
+            title="No inspection requests yet"
+            action={<LinkButton href="/hostels">Browse hostels</LinkButton>}
+          >
             When you find a hostel you like, request an inspection from its page. Replies from owners appear here.
           </EmptyState>
         ) : (
@@ -87,7 +128,10 @@ async function StudentDashboard() {
                     )}
                     {r.owner_response && <p className="mt-2 rounded-md bg-sunken px-3 py-2 text-sm">“{r.owner_response}”</p>}
                     {(r.status === "accepted" || r.status === "completed") && r.hostels && (
-                      <Link href={`/hostels/${r.hostels.slug}#ratings-heading`} className="mt-2 inline-flex text-sm font-medium text-brand hover:underline">
+                      <Link
+                        href={`/hostels/${r.hostels.slug}#ratings-heading`}
+                        className="mt-2 inline-flex text-sm font-medium text-brand hover:underline"
+                      >
                         Rate this hostel
                       </Link>
                     )}
