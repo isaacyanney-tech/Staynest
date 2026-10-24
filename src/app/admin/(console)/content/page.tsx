@@ -37,7 +37,7 @@ async function Pages() {
           <li key={page.id} className="flex flex-col rounded-lg border border-line bg-surface p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="text-lg font-semibold">
-                <Link href={`/admin/content/${page.slug}`} className="text-primary hover:underline">
+                <Link href={`/admin/content/${page.slug}`} className="text-brand hover:underline">
                   {PAGE_NAME[page.slug] ?? page.title}
                 </Link>
               </h2>

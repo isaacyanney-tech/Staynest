@@ -141,8 +141,8 @@ function Swatches({ name, legend, options, current, error }: { name: string; leg
       <legend className="text-sm font-medium">{legend}</legend>
       <div className="mt-2 space-y-2">
         {Object.entries(options).map(([hex, o]) => (
-          <label key={hex} className="flex cursor-pointer items-center gap-3 rounded-md border border-line-strong p-2.5 has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-primary/25">
-            <input type="radio" name={name} value={hex} defaultChecked={current === hex} className="accent-[var(--brand-primary)]" />
+          <label key={hex} className="flex cursor-pointer items-center gap-3 rounded-md border border-line-strong p-2.5 has-[:checked]:border-brand has-[:checked]:bg-primary-soft has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-brand/25">
+            <input type="radio" name={name} value={hex} defaultChecked={current === hex} className="accent-[var(--color-brand)]" />
             <span aria-hidden className="size-6 rounded-sm border border-black/10" style={{ background: hex }} />
             <span className="text-sm">{o.label}</span>
           </label>

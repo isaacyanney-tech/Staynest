@@ -14,9 +14,9 @@ export function SearchBox({ action, label, defaultValue, hidden = {} }: { action
         type="search"
         defaultValue={defaultValue}
         placeholder={label}
-        className="h-10 min-w-0 flex-1 rounded-md border border-line-strong bg-surface px-3 text-[0.9375rem] placeholder:text-ink/60 focus:border-primary focus:outline-none focus:ring-3 focus:ring-primary/15"
+        className="h-10 min-w-0 flex-1 rounded-md border border-line-strong bg-surface px-3 text-[0.9375rem] placeholder:text-ink/60 focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/15"
       />
-      <button type="submit" className="inline-flex h-10 items-center gap-1.5 rounded-md border border-line-strong bg-surface px-3 text-sm font-medium hover:border-primary hover:text-primary">
+      <button type="submit" className="inline-flex h-10 items-center gap-1.5 rounded-md border border-line-strong bg-surface px-3 text-sm font-medium hover:border-brand hover:text-brand">
         <Search className="size-4" aria-hidden />
         Search
       </button>

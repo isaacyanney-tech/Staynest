@@ -22,7 +22,7 @@ export function AdminNavList({ current }: { current?: string }) {
               aria-current={active ? "page" : undefined}
               className={cn(
                 "flex items-center gap-2.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-ink/75 transition-colors hover:bg-sunken hover:text-ink",
-                active && "bg-primary-soft text-primary hover:bg-primary-soft hover:text-primary",
+                active && "bg-primary-soft text-brand hover:bg-primary-soft hover:text-brand",
               )}
             >
               <item.icon className="size-4 shrink-0" aria-hidden />

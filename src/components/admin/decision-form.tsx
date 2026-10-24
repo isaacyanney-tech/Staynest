@@ -34,8 +34,8 @@ export function DecisionForm({ kind, id, options, noteHint }: { kind: keyof type
             <label
               key={o.value}
               className={cn(
-                "flex cursor-pointer gap-3 rounded-md border border-line-strong bg-surface p-3 has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-primary/25",
-                o.danger ? "has-[:checked]:border-danger has-[:checked]:bg-danger-soft" : "has-[:checked]:border-primary has-[:checked]:bg-primary-soft",
+                "flex cursor-pointer gap-3 rounded-md border border-line-strong bg-surface p-3 has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-brand/25",
+                o.danger ? "has-[:checked]:border-danger has-[:checked]:bg-danger-soft" : "has-[:checked]:border-brand has-[:checked]:bg-primary-soft",
               )}
             >
               <input
@@ -44,7 +44,7 @@ export function DecisionForm({ kind, id, options, noteHint }: { kind: keyof type
                 value={o.value}
                 defaultChecked={selected?.value === o.value}
                 onChange={() => setChoice(o.value)}
-                className="mt-1 accent-[var(--brand-primary)]"
+                className="mt-1 accent-[var(--color-brand)]"
               />
               <span>
                 <span className="block text-sm font-semibold">{o.label}</span>

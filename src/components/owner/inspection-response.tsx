@@ -47,7 +47,7 @@ export function InspectionResponse({ id, status, today }: { id: string; status: 
           {options.map((o) => (
             <label
               key={o.value}
-              className="flex cursor-pointer items-center gap-2 rounded-md border border-line-strong bg-surface px-3 py-1.5 text-sm has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:checked]:text-primary has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-primary/25"
+              className="flex cursor-pointer items-center gap-2 rounded-md border border-line-strong bg-surface px-3 py-1.5 text-sm has-[:checked]:border-brand has-[:checked]:bg-primary-soft has-[:checked]:text-brand has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-brand/25"
             >
               <input
                 type="radio"
@@ -55,7 +55,7 @@ export function InspectionResponse({ id, status, today }: { id: string; status: 
                 value={o.value}
                 defaultChecked={decision === o.value}
                 onChange={() => setDecision(o.value)}
-                className="accent-[var(--brand-primary)]"
+                className="accent-[var(--color-brand)]"
               />
               {o.label}
             </label>

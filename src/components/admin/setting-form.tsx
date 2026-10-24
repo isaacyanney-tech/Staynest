@@ -17,7 +17,7 @@ export function SettingForm({ settingKey, label, value }: { settingKey: string; 
       <input type="hidden" name="key" value={settingKey} />
       {typeof value === "boolean" ? (
         <label htmlFor={id} className="flex h-10 cursor-pointer items-center gap-2.5 text-[0.9375rem]">
-          <input id={id} type="checkbox" name="value" defaultChecked={value} className="size-4 accent-[var(--brand-primary)]" />
+          <input id={id} type="checkbox" name="value" defaultChecked={value} className="size-4 accent-[var(--color-brand)]" />
           On
         </label>
       ) : typeof value === "string" && value.length > 80 ? (

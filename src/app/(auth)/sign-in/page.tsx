@@ -18,7 +18,7 @@ export default function SignInPage({ searchParams }: PageProps<"/sign-in">) {
       </Suspense>
       <p className="mt-6 text-center text-sm text-muted">
         New to StayNest?{" "}
-        <Link href="/sign-up" className="font-medium text-primary hover:underline">
+        <Link href="/sign-up" className="font-medium text-brand hover:underline">
           Create an account
         </Link>
       </p>

@@ -48,7 +48,7 @@ export function AccountMenu({ name, email, links }: { name: string; email: strin
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen(!open)}
-        className="inline-flex h-10 items-center gap-2 rounded-full border border-line bg-surface pl-1 pr-3 text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/25"
+        className="inline-flex h-10 items-center gap-2 rounded-full border border-line bg-surface pl-1 pr-3 text-sm font-medium text-ink transition-colors hover:border-brand hover:text-brand focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand/25"
       >
         <span aria-hidden className="inline-flex size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
           {initials(name, email)}

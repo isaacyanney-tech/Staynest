@@ -47,7 +47,10 @@ async function checkout(
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("start_payment", args);
   const payment = data?.[0];
-  if (error || !payment) return { status: "error", message: friendlyDbError(error), values: formValues(formData) };
+  if (error || !payment) {
+    console.error("start_payment failed", error ?? "no payment returned");
+    return { status: "error", message: friendlyDbError(error), values: formValues(formData) };
+  }
 
   let url: string;
   try {

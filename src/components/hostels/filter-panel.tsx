@@ -88,7 +88,7 @@ export function FilterPanel({ filters, universities, idPrefix }: { filters: Host
         <Button type="submit" className="flex-1">
           Show hostels
         </Button>
-        <Link href="/hostels" className="text-sm font-medium text-muted hover:text-primary">
+        <Link href="/hostels" className="text-sm font-medium text-muted hover:text-brand">
           Clear all
         </Link>
       </div>

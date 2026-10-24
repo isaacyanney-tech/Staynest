@@ -57,7 +57,7 @@ async function Library() {
                 {m.credit && <> · {m.credit}</>}
               </p>
               <details className="pt-1">
-                <summary className="cursor-pointer text-sm font-medium text-primary">Edit details</summary>
+                <summary className="cursor-pointer text-sm font-medium text-brand">Edit details</summary>
                 <div className="mt-3">
                   <MediaDetailsForm item={m} />
                 </div>

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function HostelsPage({ searchParams }: PageProps<"/hostels">) {
   return (
     <div className="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-6 md:pt-10">
-      <h1 className="text-3xl font-semibold tracking-tight text-primary md:text-4xl">Find a hostel</h1>
+      <h1 className="text-3xl font-semibold tracking-tight text-brand md:text-4xl">Find a hostel</h1>
       <Suspense fallback={<ResultsSkeleton />}>
         <Results searchParams={searchParams} />
       </Suspense>

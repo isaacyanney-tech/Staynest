@@ -30,7 +30,7 @@ export function InspectionForm({ hostelId, rooms, minDate, maxDate }: { hostelId
               return (
                 <label
                   key={r?.id ?? "unsure"}
-                  className={`flex items-center gap-3 rounded-md border border-line-strong bg-surface px-3 py-2.5 text-sm has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-primary/25 ${full ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+                  className={`flex items-center gap-3 rounded-md border border-line-strong bg-surface px-3 py-2.5 text-sm has-[:checked]:border-brand has-[:checked]:bg-primary-soft has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-brand/25 ${full ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
                 >
                   <input
                     type="radio"
@@ -38,7 +38,7 @@ export function InspectionForm({ hostelId, rooms, minDate, maxDate }: { hostelId
                     value={r?.id ?? ""}
                     disabled={full}
                     defaultChecked={(v.roomTypeId ?? "") === (r?.id ?? "")}
-                    className="accent-[var(--brand-primary)]"
+                    className="accent-[var(--color-brand)]"
                   />
                   <span className="flex-1">
                     <span className="block font-medium text-ink">{r ? r.name : "Not sure yet"}</span>

@@ -26,7 +26,7 @@ export async function SiteFooter({ preview }: { preview?: SectionContent<"footer
           <address className="space-y-1 text-sm not-italic text-muted">
             {contact.email && (
               <p>
-                <a className="hover:text-primary" href={`mailto:${contact.email}`}>{contact.email}</a>
+                <a className="hover:text-brand" href={`mailto:${contact.email}`}>{contact.email}</a>
               </p>
             )}
             {contact.phone && <p>{contact.phone}</p>}
@@ -39,7 +39,7 @@ export async function SiteFooter({ preview }: { preview?: SectionContent<"footer
             <ul className="mt-4 space-y-2.5">
               {items.map((item) => (
                 <li key={item.id}>
-                  <Link href={item.href} className="text-[0.9375rem] text-ink/85 hover:text-primary">
+                  <Link href={item.href} className="text-[0.9375rem] text-ink/85 hover:text-brand">
                     {item.label}
                   </Link>
                 </li>
@@ -57,7 +57,7 @@ export async function SiteFooter({ preview }: { preview?: SectionContent<"footer
             <ul className="flex gap-4">
               {social.map(([name, href]) => (
                 <li key={name}>
-                  <a href={href} rel="noopener noreferrer" target="_blank" className="capitalize hover:text-primary">
+                  <a href={href} rel="noopener noreferrer" target="_blank" className="capitalize hover:text-brand">
                     {name === "x" ? "X" : name}
                   </a>
                 </li>

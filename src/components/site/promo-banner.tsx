@@ -8,7 +8,7 @@ export async function PromoBanner() {
   if (!banner) return null;
   const tone = {
     info: "bg-primary text-white",
-    promo: "bg-secondary text-ink",
+    promo: "bg-secondary text-[#17212b]",
     notice: "bg-warning-soft text-warning",
   }[banner.tone as "info" | "promo" | "notice"] ?? "bg-primary text-white";
   return (

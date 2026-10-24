@@ -44,7 +44,7 @@ async function Billing({ searchParams }: { searchParams: PageProps<"/dashboard/o
 
   return (
     <>
-      <Link href="/dashboard/owner" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary">
+      <Link href="/dashboard/owner" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-brand">
         <ArrowLeft className="size-4" aria-hidden /> Your hostels
       </Link>
       <div className="mt-3">
@@ -88,7 +88,7 @@ async function Billing({ searchParams }: { searchParams: PageProps<"/dashboard/o
               <li
                 key={p.id}
                 aria-labelledby={`plan-${p.code}`}
-                className={cn("flex flex-col rounded-lg border bg-surface p-5", isCurrent ? "border-primary ring-1 ring-primary" : "border-line")}
+                className={cn("flex flex-col rounded-lg border bg-surface p-5", isCurrent ? "border-brand ring-1 ring-brand" : "border-line")}
               >
                 <div className="flex items-center justify-between gap-2">
                   <h3 id={`plan-${p.code}`} className="text-lg font-semibold">
@@ -178,7 +178,7 @@ async function Billing({ searchParams }: { searchParams: PageProps<"/dashboard/o
           <p className="mt-3 text-muted">No payments yet.</p>
         ) : (
           // Focusable so keyboard users can scroll the table sideways on small screens.
-          <div tabIndex={0} role="region" aria-labelledby="history-heading" className="mt-4 overflow-x-auto rounded-lg border border-line bg-surface focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/25">
+          <div tabIndex={0} role="region" aria-labelledby="history-heading" className="mt-4 overflow-x-auto rounded-lg border border-line bg-surface focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand/25">
             <table className="w-full min-w-[36rem] text-left text-sm">
               <thead className="border-b border-line text-muted">
                 <tr>

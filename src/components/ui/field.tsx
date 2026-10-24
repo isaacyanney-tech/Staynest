@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 const control =
-  "block w-full rounded-md border border-line-strong bg-surface px-3 text-[0.9375rem] text-ink placeholder:text-muted/80 transition-[border-color,box-shadow] duration-150 hover:border-muted focus:border-primary focus:outline-none focus:ring-3 focus:ring-primary/15 aria-[invalid=true]:border-danger aria-[invalid=true]:ring-danger/15 disabled:bg-sunken disabled:text-muted";
+  "block w-full rounded-md border border-line-strong bg-surface px-3 text-[0.9375rem] text-ink placeholder:text-muted/80 transition-[border-color,box-shadow] duration-150 hover:border-muted focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/15 aria-[invalid=true]:border-danger aria-[invalid=true]:ring-danger/15 disabled:bg-sunken disabled:text-muted";
 
 type FieldProps = {
   label: string;
@@ -73,7 +73,7 @@ export function Checkbox({ label, className, ...props }: ComponentProps<"input">
     <label className={cn("flex cursor-pointer items-start gap-2.5 text-[0.9375rem] text-ink", className)}>
       <input
         type="checkbox"
-        className="mt-0.5 size-4 shrink-0 cursor-pointer rounded-sm border-line-strong accent-[var(--brand-primary)]"
+        className="mt-0.5 size-4 shrink-0 cursor-pointer rounded-sm border-line-strong accent-[var(--color-brand)]"
         {...props}
       />
       <span>{label}</span>

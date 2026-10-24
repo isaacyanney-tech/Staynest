@@ -35,7 +35,7 @@ export default async function HostelPage({ params }: PageProps<"/hostels/[slug]"
 
   return (
     <article className="mx-auto max-w-7xl px-4 pb-20 pt-6 sm:px-6">
-      <Link href="/hostels" className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-primary">
+      <Link href="/hostels" className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-brand">
         <ChevronLeft className="size-4" aria-hidden />
         All hostels
       </Link>
@@ -56,7 +56,7 @@ export default async function HostelPage({ params }: PageProps<"/hostels/[slug]"
             )}
             <Badge>{GENDER_LABEL[hostel.gender]}</Badge>
           </div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-primary md:text-[2.5rem] md:leading-tight">{hostel.name}</h1>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-brand md:text-[2.5rem] md:leading-tight">{hostel.name}</h1>
           <p className="mt-2 flex flex-wrap items-center gap-x-1.5 text-muted">
             <MapPin className="size-4 shrink-0" aria-hidden />
             {[hostel.address || hostel.area, hostel.city].filter(Boolean).join(", ")}
@@ -112,7 +112,7 @@ export default async function HostelPage({ params }: PageProps<"/hostels/[slug]"
                       {room.description && <p className="mt-2 text-sm text-ink/80">{room.description}</p>}
                     </div>
                     <p className="sm:text-right">
-                      <span className="font-display text-xl font-semibold text-primary">{formatMoney(room.price)}</span>
+                      <span className="font-display text-xl font-semibold text-brand">{formatMoney(room.price)}</span>
                       <span className="block text-xs text-muted">{PERIOD_LABEL[room.period]}</span>
                     </p>
                   </li>
@@ -168,7 +168,7 @@ export default async function HostelPage({ params }: PageProps<"/hostels/[slug]"
           <div className="rounded-xl border border-line bg-surface p-5 shadow-raised">
             <p>
               <span className="text-sm text-muted">From </span>
-              <span className="font-display text-3xl font-semibold tracking-tight text-primary">{formatMoney(hostel.priceFrom)}</span>
+              <span className="font-display text-3xl font-semibold tracking-tight text-brand">{formatMoney(hostel.priceFrom)}</span>
             </p>
             {hostel.pricePeriod && <p className="text-sm text-muted">{PERIOD_LABEL[hostel.pricePeriod]}</p>}
             <div className="mt-5 border-t border-line pt-5">

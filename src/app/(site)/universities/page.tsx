@@ -18,7 +18,7 @@ export default async function UniversitiesPage() {
   }
   return (
     <div className="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-6 md:pt-10">
-      <h1 className="text-3xl font-semibold tracking-tight text-primary md:text-4xl">Hostels by university</h1>
+      <h1 className="text-3xl font-semibold tracking-tight text-brand md:text-4xl">Hostels by university</h1>
       <p className="mt-3 max-w-2xl text-lg text-ink/80">Pick your campus to see hostels nearby, with prices and walking distance on every listing.</p>
       {[...byRegion.entries()].map(([region, list]) => (
         <section key={region} aria-labelledby={`region-${slugify(region)}`} className="mt-10">
@@ -30,7 +30,7 @@ export default async function UniversitiesPage() {
               <li key={u.slug} className="bg-surface">
                 <Link href={`/universities/${u.slug}`} className="group flex h-full flex-col justify-between gap-4 p-5 transition-colors hover:bg-primary-soft/60">
                   <div>
-                    <p className="font-display text-xl font-semibold tracking-tight text-primary">{u.shortName}</p>
+                    <p className="font-display text-xl font-semibold tracking-tight text-brand">{u.shortName}</p>
                     <p className="mt-1 text-sm text-ink/80">{u.name}</p>
                   </div>
                   <p className="flex items-center justify-between text-sm text-ink/70">

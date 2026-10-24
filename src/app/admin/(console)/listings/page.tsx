@@ -74,7 +74,7 @@ async function Listings({ searchParams }: Pick<PageProps<"/admin/listings">, "se
               {rows.map((h) => (
                 <tr key={h.id} className="hover:bg-sunken/50">
                   <td className="px-4 py-3">
-                    <Link href={`/admin/listings/${h.id}`} className="font-semibold text-primary hover:underline">
+                    <Link href={`/admin/listings/${h.id}`} className="font-semibold text-brand hover:underline">
                       {h.name}
                     </Link>
                     <span className="block text-ink/70">

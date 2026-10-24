@@ -65,7 +65,7 @@ async function OwnerDashboard({ searchParams }: { searchParams: PageProps<"/dash
       <p className="mt-6 text-sm text-muted">
         {plan.name} plan: {plan.listingLimit === null ? `${used} listings, no limit` : `${used} of ${plan.listingLimit} listing${plan.listingLimit === 1 ? "" : "s"} used`},
         up to {plan.photoLimit} photos each.{" "}
-        <Link href="/dashboard/owner/billing" className="font-medium text-primary underline-offset-2 hover:underline">
+        <Link href="/dashboard/owner/billing" className="font-medium text-brand underline-offset-2 hover:underline">
           Plan, billing and featured placements
         </Link>
       </p>
@@ -85,7 +85,7 @@ async function OwnerDashboard({ searchParams }: { searchParams: PageProps<"/dash
               return (
                 <li key={h.id} className="relative flex flex-wrap items-center justify-between gap-3 p-4 transition-colors hover:bg-sunken/60 sm:p-5">
                   <div className="min-w-0">
-                    <Link href={`/dashboard/owner/hostels/${h.id}`} className="font-semibold after:absolute after:inset-0 hover:text-primary">
+                    <Link href={`/dashboard/owner/hostels/${h.id}`} className="font-semibold after:absolute after:inset-0 hover:text-brand">
                       {h.name}
                     </Link>
                     <p className="mt-0.5 text-sm text-muted">
@@ -137,7 +137,7 @@ async function OwnerDashboard({ searchParams }: { searchParams: PageProps<"/dash
                 {r.student?.phone && (
                   <p className="mt-1 flex items-center gap-1.5 text-sm">
                     <Phone className="size-3.5" aria-hidden />
-                    <a href={`tel:${r.student.phone.replace(/[^\d+]/g, "")}`} className="text-primary underline-offset-2 hover:underline">
+                    <a href={`tel:${r.student.phone.replace(/[^\d+]/g, "")}`} className="text-brand underline-offset-2 hover:underline">
                       {r.student.phone}
                     </a>
                   </p>

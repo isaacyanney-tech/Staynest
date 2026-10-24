@@ -4,7 +4,7 @@ export function AdminPageHeader({ title, description, children }: { title: strin
   return (
     <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
       <div className="min-w-0">
-        <h1 className="text-3xl font-semibold tracking-tight text-primary">{title}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-brand">{title}</h1>
         {description && <p className="mt-1.5 max-w-prose text-[0.9375rem] text-muted">{description}</p>}
       </div>
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
@@ -24,7 +24,7 @@ export function FilterTabs({ items, label }: { items: { href: string; label: str
               aria-current={t.active ? "page" : undefined}
               className={
                 t.active
-                  ? "inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 border-primary px-3 py-2.5 text-primary"
+                  ? "inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 border-brand px-3 py-2.5 text-brand"
                   : "inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-ink/70 hover:text-ink"
               }
             >

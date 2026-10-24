@@ -31,11 +31,11 @@ function inline(text: string, keyBase: string): ReactNode[] {
 export function RichText({ source }: { source: string }) {
   const blocks = source.replace(/\r\n/g, "\n").split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
   return (
-    <div className="space-y-5 text-[1.0625rem] leading-relaxed text-ink/90 [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2">
+    <div className="space-y-5 text-[1.0625rem] leading-relaxed text-ink/90 [&_a]:font-medium [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-2">
       {blocks.map((block, n) => {
         const key = `b${n}`;
         if (block.startsWith("### ")) return <h3 key={key} className="pt-2 text-xl font-semibold text-ink">{inline(block.slice(4), key)}</h3>;
-        if (block.startsWith("## ")) return <h2 key={key} className="pt-4 text-2xl font-semibold text-primary">{inline(block.slice(3), key)}</h2>;
+        if (block.startsWith("## ")) return <h2 key={key} className="pt-4 text-2xl font-semibold text-brand">{inline(block.slice(3), key)}</h2>;
         const lines = block.split("\n");
         if (lines.every((l) => l.startsWith("- "))) {
           return (

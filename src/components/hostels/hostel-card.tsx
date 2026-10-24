@@ -8,15 +8,15 @@ import { SafeImage } from "./safe-image";
 export function HostelCard({ hostel, priority = false }: { hostel: Card; priority?: boolean }) {
   const distance = formatDistance(hostel.distanceKm);
   return (
-    <article className="group relative flex flex-col">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-sunken">
+    <article className="group relative flex flex-col transition-transform duration-300 ease-out hover:-translate-y-1">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-sunken shadow-none transition-shadow duration-300 group-hover:shadow-overlay">
         {hostel.cover ? (
           <SafeImage
             src={hostel.cover.url}
             alt={hostel.cover.alt}
             fill
             sizes="(min-width: 1280px) 400px, (min-width: 768px) 45vw, 100vw"
-            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
             priority={priority}
           />
         ) : (
@@ -49,7 +49,7 @@ export function HostelCard({ hostel, priority = false }: { hostel: Card; priorit
         <div className="mt-3 flex items-end justify-between gap-3 border-t border-line pt-3">
           <p>
             <span className="text-xs text-muted">From </span>
-            <span className="font-display text-lg font-semibold tracking-tight text-primary">{formatMoney(hostel.priceFrom)}</span>
+            <span className="font-display text-lg font-semibold tracking-tight text-brand">{formatMoney(hostel.priceFrom)}</span>
             {hostel.pricePeriod && <span className="text-xs text-muted"> {PERIOD_SHORT[hostel.pricePeriod]}</span>}
           </p>
           <p className="text-right text-xs leading-tight text-muted">

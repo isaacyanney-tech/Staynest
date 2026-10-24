@@ -19,7 +19,7 @@ export const metadata: Metadata = { title: "Edit page · Admin", robots: { index
 export default function AdminContentPageEditor({ params }: PageProps<"/admin/content/[slug]">) {
   return (
     <>
-      <Link href="/admin/content" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink/75 hover:text-primary">
+      <Link href="/admin/content" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink/75 hover:text-brand">
         <ArrowLeft className="size-4" aria-hidden />
         Pages and content
       </Link>
@@ -68,7 +68,7 @@ async function Editor({ params }: Pick<PageProps<"/admin/content/[slug]">, "para
               return (
                 <li key={s.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
                   <div className="min-w-0 flex-1">
-                    <Link href={`/admin/content/${page.slug}/${s.key}`} className="font-semibold text-primary hover:underline">
+                    <Link href={`/admin/content/${page.slug}/${s.key}`} className="font-semibold text-brand hover:underline">
                       {s.label}
                     </Link>
                     <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-sm text-ink/70">
@@ -116,7 +116,7 @@ function ArrangeButton({ op, label, disabled, children }: { op: string; label: s
       aria-label={label}
       title={label}
       disabled={disabled}
-      className="inline-flex size-9 items-center justify-center rounded-md border border-line text-ink/75 hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+      className="inline-flex size-9 items-center justify-center rounded-md border border-line text-ink/75 hover:border-brand hover:text-brand disabled:pointer-events-none disabled:opacity-40"
     >
       {children}
     </button>

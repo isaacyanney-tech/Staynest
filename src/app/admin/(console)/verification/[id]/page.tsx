@@ -17,7 +17,7 @@ export const metadata: Metadata = { title: "Verification request · Admin", robo
 export default function AdminVerificationReviewPage({ params }: PageProps<"/admin/verification/[id]">) {
   return (
     <>
-      <Link href="/admin/verification" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink/75 hover:text-primary">
+      <Link href="/admin/verification" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink/75 hover:text-brand">
         <ArrowLeft className="size-4" aria-hidden />
         Verification
       </Link>
@@ -40,7 +40,7 @@ async function Review({ params }: Pick<PageProps<"/admin/verification/[id]">, "p
     <div className="mt-3 lg:grid lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-8">
       <div className="min-w-0">
         <header className="border-b border-line pb-6">
-          <h1 className="text-3xl font-semibold tracking-tight text-primary">{app.hostel?.name ?? "Deleted listing"}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-brand">{app.hostel?.name ?? "Deleted listing"}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-1.5 text-sm">
             <Badge tone={status.tone}>{status.label}</Badge>
             <span className="text-ink/70">
@@ -49,7 +49,7 @@ async function Review({ params }: Pick<PageProps<"/admin/verification/[id]">, "p
             </span>
           </div>
           {app.hostel && (
-            <Link href={`/admin/listings/${app.hostel.id}`} className="mt-3 inline-block text-sm font-medium text-primary hover:underline">
+            <Link href={`/admin/listings/${app.hostel.id}`} className="mt-3 inline-block text-sm font-medium text-brand hover:underline">
               Review the listing ({app.hostel.area}, {app.hostel.city})
             </Link>
           )}
@@ -74,7 +74,7 @@ async function Review({ params }: Pick<PageProps<"/admin/verification/[id]">, "p
                   </span>
                 </span>
                 {d.url ? (
-                  <a href={d.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+                  <a href={d.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline">
                     Open {d.fileName}
                     <ExternalLink className="size-3.5" aria-hidden />
                     <span className="sr-only">(opens in a new tab)</span>
@@ -93,7 +93,7 @@ async function Review({ params }: Pick<PageProps<"/admin/verification/[id]">, "p
             <ul className="mt-3 space-y-2 text-sm">
               {app.history.map((h) => (
                 <li key={h.id} className="rounded-md border border-line bg-surface p-3">
-                  <Link href={`/admin/verification/${h.id}`} className="font-medium text-primary hover:underline">
+                  <Link href={`/admin/verification/${h.id}`} className="font-medium text-brand hover:underline">
                     {formatDate(h.submitted_at)}
                   </Link>{" "}
                   · {VERIFICATION_STATUS[h.status].label}

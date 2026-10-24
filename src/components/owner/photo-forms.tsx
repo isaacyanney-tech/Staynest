@@ -42,7 +42,7 @@ export function PhotoUploadForm({ hostelId, remaining }: { hostelId: string; rem
             required
             disabled={remaining <= 0}
             onChange={() => setTooBig(null)}
-            className="h-auto py-2 file:mr-3 file:rounded file:border-0 file:bg-primary-soft file:px-3 file:py-1 file:text-sm file:font-medium file:text-primary"
+            className="h-auto py-2 file:mr-3 file:rounded file:border-0 file:bg-primary-soft file:px-3 file:py-1 file:text-sm file:font-medium file:text-brand"
           />
         )}
       </Field>

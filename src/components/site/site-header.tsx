@@ -5,6 +5,7 @@ import { Wordmark } from "./logo";
 import { NavLinks, NavList } from "./nav-links";
 import { MobileNav } from "./mobile-nav";
 import { AccountLinks, AccountLinksFallback } from "./account-link";
+import { ColorModeToggle } from "./color-mode-toggle";
 
 export async function SiteHeader() {
   const [nav, settings] = await Promise.all([getNavigation(), getSiteSettings()]);
@@ -19,19 +20,23 @@ export async function SiteHeader() {
             <NavLinks items={nav.header} />
           </Suspense>
         </nav>
-        <div className="hidden md:block">
+        <div className="hidden items-center gap-1 md:flex">
+          <ColorModeToggle />
           <Suspense fallback={<AccountLinksFallback />}>
             <AccountLinks />
           </Suspense>
         </div>
-        <MobileNav
+        <div className="flex items-center gap-1 md:hidden">
+          <ColorModeToggle />
+          <MobileNav
           items={nav.header}
           account={
             <Suspense fallback={<AccountLinksFallback />}>
               <AccountLinks stacked />
             </Suspense>
           }
-        />
+          />
+        </div>
       </div>
     </header>
   );

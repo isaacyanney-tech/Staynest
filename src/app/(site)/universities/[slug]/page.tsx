@@ -44,7 +44,7 @@ export default async function UniversityPage({ params }: PageProps<"/universitie
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-20 pt-6 sm:px-6">
-      <Link href="/universities" className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-primary">
+      <Link href="/universities" className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-brand">
         <ChevronLeft className="size-4" aria-hidden />
         All universities
       </Link>
@@ -54,7 +54,7 @@ export default async function UniversityPage({ params }: PageProps<"/universitie
           {university.city}
           {university.region && <>, {university.region}</>}
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-primary md:text-4xl">Student hostels near {university.shortName}</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-brand md:text-4xl">Student hostels near {university.shortName}</h1>
         <p className="mt-3 text-lg text-ink/80">{university.description || university.name}</p>
       </header>
 
@@ -82,7 +82,7 @@ export default async function UniversityPage({ params }: PageProps<"/universitie
             Hostels with rooms near campus
           </h2>
           {total > 0 && (
-            <Link href={searchHref} className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+            <Link href={searchHref} className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline">
               Filter by price, room size and amenities <ArrowRight className="size-4" aria-hidden />
             </Link>
           )}

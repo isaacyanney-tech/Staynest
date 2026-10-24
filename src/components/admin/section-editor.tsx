@@ -215,7 +215,7 @@ function FieldControl({ field, value, path, onChange, err, options }: Omit<Field
           <legend className="text-sm font-medium">{field.label}</legend>
           {field.optional && (
             <label className="flex cursor-pointer items-center gap-2.5 text-[0.9375rem]">
-              <input type="checkbox" checked={Boolean(link)} onChange={(e) => set(e.target.checked ? { label: "", href: "" } : null)} className="size-4 accent-[var(--brand-primary)]" />
+              <input type="checkbox" checked={Boolean(link)} onChange={(e) => set(e.target.checked ? { label: "", href: "" } : null)} className="size-4 accent-[var(--color-brand)]" />
               Show this link
             </label>
           )}
@@ -287,7 +287,7 @@ function FieldControl({ field, value, path, onChange, err, options }: Omit<Field
                       checked={on}
                       disabled={!on && full}
                       onChange={() => set(on ? picked.filter((s) => s !== o.value) : [...picked, o.value])}
-                      className="mt-0.5 size-4 shrink-0 accent-[var(--brand-primary)]"
+                      className="mt-0.5 size-4 shrink-0 accent-[var(--color-brand)]"
                     />
                     {o.label}
                   </label>
