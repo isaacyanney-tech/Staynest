@@ -74,8 +74,8 @@ export const inspectionResponseSchema = z
   .object({
     id: z.uuid(),
     decision: z.enum(["accepted", "declined", "rescheduled", "completed"]),
-    response: z.string().trim().max(1000, "Keep your reply under 1,000 characters."),
+    reply: z.string().trim().max(1000, "Keep your reply under 1,000 characters."),
     proposedDate: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).transform((v) => v || null),
   })
   .refine((v) => v.decision !== "rescheduled" || v.proposedDate, { path: ["proposedDate"], message: "Choose the date you can offer." })
-  .refine((v) => v.decision !== "declined" || v.response.length > 0, { path: ["response"], message: "Tell the student why, so they can look elsewhere." });
+  .refine((v) => v.decision !== "declined" || v.reply.length > 0, { path: ["reply"], message: "Tell the student why, so they can look elsewhere." });

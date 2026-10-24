@@ -408,7 +408,7 @@ export async function respondToInspection(_prev: FormState, formData: FormData):
   const parsed = inspectionResponseSchema.safeParse({
     id: formData.get("id"),
     decision: formData.get("decision"),
-    response: formData.get("response") ?? "",
+    reply: formData.get("reply") ?? "",
     proposedDate: formData.get("proposedDate") ?? "",
   });
   if (!parsed.success) return fromZodError(parsed.error, formData);
@@ -420,7 +420,7 @@ export async function respondToInspection(_prev: FormState, formData: FormData):
     .from("inspection_requests")
     .update({
       status: parsed.data.decision,
-      owner_response: parsed.data.response || null,
+      owner_response: parsed.data.reply || null,
       proposed_date: parsed.data.decision === "rescheduled" ? parsed.data.proposedDate : null,
     })
     .eq("id", parsed.data.id)
