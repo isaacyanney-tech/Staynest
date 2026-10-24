@@ -103,6 +103,14 @@ async function auth(req, res, url) {
     const u = claims ? userById(claims.sub) : null;
     return u ? send(res, 200, toUser(u)) : send(res, 401, { code: 401, error_code: "bad_jwt", msg: "invalid JWT" });
   }
+  if (path === "/user" && req.method === "PUT") {
+    // Password changes are accepted but not stored: every test account keeps PASSWORD.
+    const claims = verify(bearer);
+    const u = claims ? userById(claims.sub) : null;
+    if (!u) return send(res, 401, { code: 401, error_code: "bad_jwt", msg: "invalid JWT" });
+    if (body.password === PASSWORD) return send(res, 422, { code: 422, error_code: "same_password", msg: "New password should be different from the old password." });
+    return send(res, 200, toUser(u));
+  }
   if (path === "/signup") {
     const email = String(body.email ?? "").toLowerCase();
     if (!userByEmail(email)) {

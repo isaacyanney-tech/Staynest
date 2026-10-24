@@ -2,17 +2,13 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { homeFor, type Role } from "@/lib/auth";
+import { homeFor, landingFor, type Role } from "@/lib/auth";
 import { publicEnv } from "@/lib/env";
 import { formValues, fromZodError, type FormState } from "@/lib/forms";
 import { safeNext } from "@/lib/safe-next";
+import { newPassword, passwordChangeSchema } from "@/lib/account/schemas";
 
 const email = z.email("Enter a valid email address.").trim().toLowerCase().max(254);
-const newPassword = z
-  .string()
-  .min(10, "Use at least 10 characters.")
-  .max(72, "Use 72 characters or fewer.")
-  .refine((v) => /[A-Za-z]/.test(v) && /\d/.test(v), "Include at least one letter and one number.");
 
 const signInSchema = z.object({
   email,
@@ -52,10 +48,7 @@ async function doSignIn(formData: FormData, area: "site" | "admin"): Promise<For
     return invalid;
   }
 
-  const next = safeNext(formData.get("next"));
-  const role = profile.role as Role;
-  const allowed = next && (role === "admin" || !next.startsWith("/admin")) ? next : null;
-  redirect(allowed ?? homeFor(role));
+  redirect(landingFor(profile.role as Role, safeNext(formData.get("next"))));
 }
 
 const signUpSchema = z.object({
@@ -113,10 +106,7 @@ export async function requestPasswordReset(_prev: FormState, formData: FormData)
 }
 
 export async function resetPassword(_prev: FormState, formData: FormData): Promise<FormState> {
-  const parsed = z
-    .object({ password: newPassword, confirm: z.string() })
-    .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "The passwords do not match." })
-    .safeParse({ password: formData.get("password"), confirm: formData.get("confirm") });
+  const parsed = passwordChangeSchema.safeParse({ password: formData.get("password"), confirm: formData.get("confirm") });
   if (!parsed.success) return fromZodError(parsed.error);
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { safeNext } from "@/lib/safe-next";
+import { redirectIfSignedIn } from "@/lib/auth";
 import { AuthHeading } from "@/components/auth/auth-shell";
 import { SignUpForm } from "@/components/auth/forms";
 import { Skeleton } from "@/components/ui/states";
@@ -28,5 +29,6 @@ export default function SignUpPage({ searchParams }: PageProps<"/sign-up">) {
 async function Form({ searchParams }: { searchParams: PageProps<"/sign-up">["searchParams"] }) {
   const sp = await searchParams;
   const next = safeNext(typeof sp.next === "string" ? sp.next : null) ?? undefined;
+  await redirectIfSignedIn(next ?? null);
   return <SignUpForm next={next} initialRole={sp.role === "owner" ? "owner" : "student"} />;
 }
