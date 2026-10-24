@@ -11,6 +11,12 @@ const supabaseUrl = (() => {
 const localSupabase = supabaseUrl?.hostname === "127.0.0.1" || supabaseUrl?.hostname === "localhost";
 
 const nextConfig: NextConfig = {
+  env: {
+    // Auth emails, share previews and the sitemap need the public address.
+    // Netlify sets URL to the site's primary address during builds, so the
+    // site still works if NEXT_PUBLIC_SITE_URL was never added.
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || process.env.URL || "",
+  },
   cacheComponents: true,
   partialPrefetching: true,
   images: {

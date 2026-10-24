@@ -238,7 +238,7 @@ async function InspectionSlot({ hostel }: { hostel: HostelDetail }) {
   return (
     <InspectionForm
       hostelId={hostel.id}
-      rooms={hostel.rooms.map((r) => ({ id: r.id, name: `${r.name} · ${formatMoney(r.price)}` }))}
+      rooms={hostel.rooms.map((r) => ({ id: r.id, name: r.name, price: `${formatMoney(r.price)} ${PERIOD_LABEL[r.period]}`, available: r.available }))}
       minDate={toIso(today)}
       maxDate={toIso(new Date(today.getTime() + 120 * 864e5))}
     />

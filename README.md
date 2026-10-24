@@ -11,7 +11,8 @@ StayNest helps students find hostels near Ghanaian universities. Students search
 | 1 | Database, permissions, homepage, search, hostel pages, inspection requests, content pages, pricing, sign-in and sign-up, first dashboards | Done |
 | 2 | Owner listing editor: hostels, rooms and prices, photo uploads, verification documents, replies to inspection requests | Done |
 | 3 | Admin console: moderation, verification review, CMS editor with draft, preview, publish and revert, media, site settings, plans | Done |
-| 4 | Paystack plan payments and featured placements, verified on the server and by webhook | This branch |
+| 4 | Paystack plan payments and featured placements, verified on the server and by webhook | Done |
+| 5 | Launch polish: university landing pages, sitemap and robots.txt, performance and accessibility checks | This branch |
 
 ## Getting started
 
@@ -27,7 +28,7 @@ npm run dev
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser and server | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser and server | Supabase anon or publishable key (safe to expose; RLS protects data) |
-| `NEXT_PUBLIC_SITE_URL` | Browser and server | Public site URL, used in auth email links |
+| `NEXT_PUBLIC_SITE_URL` | Browser and server | Public site URL, used in auth email links, the sitemap and canonical links. On Netlify it falls back to the site's primary URL when unset |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Server only** | Admin bootstrap script and recording verified payments |
 | `PAYSTACK_SECRET_KEY` | **Server only** | Paystack API calls and webhook signature checks. Without it (or the service-role key) payment buttons are hidden |
 | `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Browser | Not needed by the current redirect checkout; kept for a future inline checkout |
@@ -88,6 +89,7 @@ Plans never renew automatically: each payment covers one billing period, paying 
 1. Create a site from this repository. Netlify detects Next.js and uses its runtime; the build command is `npm run build`.
 2. Add the environment variables above in **Site configuration → Environment variables**. Mark `SUPABASE_SERVICE_ROLE_KEY` and `PAYSTACK_SECRET_KEY` as secret.
 3. In Supabase **Authentication → URL configuration**, set the site URL to your Netlify domain and add `https://<your-domain>/auth/callback` to the redirect URLs.
+4. Before launch, set **Site configuration → Access & security → Visitor access** to public. A private (team login) site turns away visitors, and its login check can also reject form submissions from signed-in users.
 
 ## Tests
 
