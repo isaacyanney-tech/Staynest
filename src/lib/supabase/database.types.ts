@@ -577,6 +577,8 @@ export type Database = {
           amount: number
           created_at: string
           currency: string
+          featured_weeks: number | null
+          gateway_response: string | null
           hostel_id: string | null
           id: string
           owner_id: string
@@ -593,6 +595,8 @@ export type Database = {
           amount: number
           created_at?: string
           currency: string
+          featured_weeks?: number | null
+          gateway_response?: string | null
           hostel_id?: string | null
           id?: string
           owner_id: string
@@ -609,6 +613,8 @@ export type Database = {
           amount?: number
           created_at?: string
           currency?: string
+          featured_weeks?: number | null
+          gateway_response?: string | null
           hostel_id?: string | null
           id?: string
           owner_id?: string
@@ -1150,16 +1156,43 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"]
       }
       hostel_is_public: { Args: { p_hostel: string }; Returns: boolean }
+      finalize_payment: {
+        Args: {
+          p_amount_minor: number
+          p_currency: string
+          p_gateway_response: string
+          p_payload: Json
+          p_reference: string
+          p_status: string
+        }
+        Returns: string
+      }
       is_admin: { Args: never; Returns: boolean }
+      my_featured_slots_left: { Args: never; Returns: number }
       is_owner: { Args: never; Returns: boolean }
       is_privileged_connection: { Args: never; Returns: boolean }
       owns_hostel: { Args: { p_hostel: string }; Returns: boolean }
       publish_section: { Args: { p_section: string }; Returns: string }
+      start_payment: {
+        Args: {
+          p_hostel?: string
+          p_plan_code?: string
+          p_purpose: string
+          p_weeks?: number
+        }
+        Returns: {
+          amount: number
+          currency: string
+          description: string
+          reference: string
+        }[]
+      }
       restore_revision_to_draft: {
         Args: { p_revision: number }
         Returns: string
       }
       unpublish_section: { Args: { p_section: string }; Returns: undefined }
+      use_featured_slot: { Args: { p_hostel: string }; Returns: string }
     }
     Enums: {
       app_role: "student" | "owner" | "admin"

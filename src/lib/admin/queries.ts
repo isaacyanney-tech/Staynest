@@ -201,3 +201,42 @@ export async function getBusinessSettings() {
   const { data } = await supabase.from("business_settings").select("*").order("key");
   return data ?? [];
 }
+
+// ------------------------------------------------------------------ payments
+
+export async function getPayments(status: "pending" | "success" | "failed" | "abandoned" | undefined, page = 1) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("payments")
+    .select("id, reference, purpose, status, amount, currency, created_at, verified_at, gateway_response, featured_weeks, owner_id, plans(name), hostels(name)", {
+      count: "exact",
+    })
+    .order("created_at", { ascending: false })
+    .range((page - 1) * ADMIN_PAGE_SIZE, page * ADMIN_PAGE_SIZE - 1);
+  if (status) query = query.eq("status", status);
+  const { data, count } = await query;
+  const names = await namesFor((data ?? []).map((p) => p.owner_id));
+  return {
+    rows: (data ?? []).map((p) => {
+      const plan = p.plans as unknown as { name: string } | null;
+      const hostel = p.hostels as unknown as { name: string } | null;
+      const weeks = p.featured_weeks ?? 0;
+      return {
+        id: p.id,
+        reference: p.reference,
+        status: p.status as "pending" | "success" | "failed" | "abandoned",
+        amount: Number(p.amount),
+        currency: p.currency,
+        createdAt: p.created_at,
+        verifiedAt: p.verified_at,
+        note: p.gateway_response,
+        ownerName: names.get(p.owner_id) ?? "Unknown owner",
+        label:
+          p.purpose === "subscription"
+            ? `${plan?.name ?? "Plan"} plan`
+            : `Featured: ${hostel?.name ?? "hostel"}, ${weeks} week${weeks === 1 ? "" : "s"}`,
+      };
+    }),
+    total: count ?? 0,
+  };
+}

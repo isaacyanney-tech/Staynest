@@ -63,7 +63,7 @@ export default async function PricingPage() {
                   ))}
                 </ul>
                 <LinkButton
-                  href={plan.price === 0 ? "/sign-up?role=owner" : `/sign-up?role=owner&plan=${plan.code}`}
+                  href={plan.price === 0 ? "/sign-up?role=owner" : "/sign-up?role=owner&next=/dashboard/owner/billing"}
                   variant={isHighlighted ? "primary" : "outline"}
                   className="mt-7 w-full"
                 >
@@ -79,7 +79,7 @@ export default async function PricingPage() {
         <div>
           <h2 className="text-xl font-semibold">Featured placement</h2>
           <p className="mt-2 text-muted">
-            Put a published listing on the homepage and at the top of search
+            Put a published listing among the hostels shown on the homepage
             {featuredPrice > 0 ? <> for {formatMoney(featuredPrice)} a week.</> : "."}
           </p>
         </div>
@@ -90,7 +90,7 @@ export default async function PricingPage() {
           </p>
         </div>
       </div>
-      <p className="mt-6 text-sm text-muted">Prices are in Ghana cedis. Paid plans are billed monthly through Paystack.</p>
+      <p className="mt-6 text-sm text-muted">Prices are in Ghana cedis and paid through Paystack. Plans never renew by themselves: you pay for one period at a time, and only when you choose to. Already have an account? Manage your plan from your dashboard.</p>
     </div>
   );
 }

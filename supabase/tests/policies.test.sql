@@ -372,6 +372,67 @@ select tests.reset_role();
 select tests.is('admin plan change is audited',
   (select count(*) from public.audit_log where entity = 'plans')::int >= 1, true);
 
+-- ---------------------------------------------------------------- payments
+select tests.reset_role();
+update public.hostels set status = 'published' where slug = 'owner-one-hostel';
+select tests.act_as('00000000-0000-0000-0000-0000000000b1');
+select tests.throws('student cannot start a payment', $$select * from public.start_payment('subscription', 'standard')$$, '42501');
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+select tests.throws('the free plan needs no payment', $$select * from public.start_payment('subscription', 'free')$$, 'P0001');
+select tests.throws('unknown plans are refused', $$select * from public.start_payment('subscription', 'gold')$$, 'P0001');
+select tests.is('a plan is priced from the database',
+  (select amount from public.start_payment('subscription', 'standard')), 150.00::numeric);
+select tests.is('featured weeks are priced from business settings',
+  (select amount from public.start_payment('featured_placement', null,
+     (select id from public.hostels where slug = 'owner-one-hostel'), 2)), 100::numeric);
+select tests.throws('owners cannot feature other owners'' hostels',
+  $$select * from public.start_payment('featured_placement', null, (select id from public.hostels where owner_id is null and status = 'published' limit 1), 1)$$);
+select tests.throws('owner cannot settle their own payment',
+  $$select public.finalize_payment((select reference from public.payments where purpose = 'subscription' limit 1), 'success', 15000, 'GHS', 'ok', '{}')$$, '42501');
+select tests.throws('owner cannot use featured weeks without a plan that includes them',
+  $$select public.use_featured_slot((select id from public.hostels where slug = 'owner-one-hostel'))$$, 'P0001');
+
+-- The server settles payments with the service role after asking Paystack.
+select tests.reset_role();
+set role service_role;
+select public.finalize_payment((select reference from public.payments where purpose = 'subscription'), 'success', 100, 'GHS', 'ok', '{}') as outcome \gset
+reset role;
+select tests.is('a short payment is refused', :'outcome'::text, 'mismatch');
+select tests.is('a mismatched payment grants nothing',
+  (select count(*) from public.subscriptions where owner_id = '00000000-0000-0000-0000-0000000000a1')::int, 0);
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+select reference from public.start_payment('subscription', 'standard') \gset
+select tests.reset_role();
+set role service_role;
+select public.finalize_payment(:'reference', 'success', 15000, 'ghs', 'Approved', '{}') as first_outcome \gset
+select public.finalize_payment(:'reference', 'success', 15000, 'GHS', 'Approved', '{}') as second_outcome \gset
+reset role;
+select tests.is('a full payment settles', :'first_outcome'::text, 'settled');
+select tests.is('settling twice changes nothing', :'second_outcome'::text, 'already_settled');
+select tests.is('one active subscription', (select count(*) from public.subscriptions
+  where owner_id = '00000000-0000-0000-0000-0000000000a1' and status = 'active')::int, 1);
+select tests.is('the subscription keeps the price paid', (select price_amount from public.subscriptions
+  where owner_id = '00000000-0000-0000-0000-0000000000a1' and status = 'active'), 150.00::numeric);
+select tests.is('the plan raises the listing limit', public.owner_listing_limit('00000000-0000-0000-0000-0000000000a1'), 5);
+select tests.act_as('00000000-0000-0000-0000-0000000000a1');
+select tests.is('owner sees one included featured week', public.my_featured_slots_left(), 1);
+select public.use_featured_slot((select id from public.hostels where slug = 'owner-one-hostel'));
+select tests.is('the included week is used', public.my_featured_slots_left(), 0);
+select tests.throws('it cannot be used twice',
+  $$select public.use_featured_slot((select id from public.hostels where slug = 'owner-one-hostel'))$$, 'P0001');
+select reference from public.start_payment('featured_placement', null, (select id from public.hostels where slug = 'owner-one-hostel'), 2) \gset
+select tests.reset_role();
+set role service_role;
+select public.finalize_payment(:'reference', 'success', 10000, 'GHS', 'Approved', '{}');
+reset role;
+select tests.is('paid weeks follow the included week',
+  (select max(ends_at) - min(starts_at) from public.featured_placements f join public.hostels h on h.id = f.hostel_id
+    where h.slug = 'owner-one-hostel'), interval '21 days');
+select tests.act_as('00000000-0000-0000-0000-0000000000a2');
+select tests.is('owners see only their own payments',
+  (select count(*) from public.payments where owner_id = '00000000-0000-0000-0000-0000000000a1')::int, 0);
+select tests.reset_role();
+
 -- ---------------------------------------------------------------- admin user list
 select tests.act_as('00000000-0000-0000-0000-00000000000a');
 select tests.is('admin lists accounts with emails',
