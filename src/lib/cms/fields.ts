@@ -56,6 +56,11 @@ export const SECTION_FIELDS: Record<SectionType, FieldSpec[]> = {
     { kind: "choices", name: "hostelSlugs", label: "Hostels to show first", source: "hostels", max: 12, hint: "Paid placements and new listings fill the remaining spaces." },
     { kind: "count", name: "limit", label: "How many to show", min: 1, max: 12 },
   ],
+  ratings: [
+    heading(),
+    { kind: "textarea", name: "subheading", label: "Introduction", max: 240, rows: 2 },
+    { kind: "count", name: "limit", label: "How many ratings to show", min: 1, max: 12, hint: "The newest ratings are shown. The section stays hidden until there is at least one." },
+  ],
   how_it_works: [heading(), { kind: "list", name: "steps", label: "Steps", itemLabel: "Step", min: 1, max: 6, fields: card() }],
   trust: [
     heading(),

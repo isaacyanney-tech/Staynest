@@ -240,3 +240,40 @@ export async function getPayments(status: "pending" | "success" | "failed" | "ab
     total: count ?? 0,
   };
 }
+
+export type AdminRating = {
+  id: string;
+  stars: number;
+  comment: string;
+  reviewer: string;
+  hidden: boolean;
+  hiddenReason: string | null;
+  createdAt: string;
+  hostel: { slug: string; name: string };
+};
+
+export async function getAdminRatings(filter: "visible" | "hidden" | undefined, page = 1) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("hostel_ratings")
+    .select("id, stars, comment, reviewer_name, is_hidden, hidden_reason, created_at, hostels(slug, name)", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range((page - 1) * ADMIN_PAGE_SIZE, page * ADMIN_PAGE_SIZE - 1);
+  if (filter) query = query.eq("is_hidden", filter === "hidden");
+  const { data, count } = await query;
+  return {
+    rows: (data ?? []).map(
+      (r): AdminRating => ({
+        id: r.id,
+        stars: r.stars,
+        comment: r.comment,
+        reviewer: r.reviewer_name,
+        hidden: r.is_hidden,
+        hiddenReason: r.hidden_reason,
+        createdAt: r.created_at,
+        hostel: r.hostels ?? { slug: "", name: "Deleted hostel" },
+      }),
+    ),
+    total: count ?? 0,
+  };
+}

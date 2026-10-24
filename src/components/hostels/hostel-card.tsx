@@ -4,6 +4,7 @@ import type { HostelCard as Card } from "@/lib/hostels/queries";
 import { formatDistance, formatMoney, GENDER_LABEL, PERIOD_SHORT } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { SafeImage } from "./safe-image";
+import { RatingBadge } from "@/components/ratings/stars";
 
 export function HostelCard({ hostel, priority = false }: { hostel: Card; priority?: boolean }) {
   const distance = formatDistance(hostel.distanceKm);
@@ -39,6 +40,7 @@ export function HostelCard({ hostel, priority = false }: { hostel: Card; priorit
             </Link>
           </h3>
         </div>
+        {hostel.rating && <RatingBadge average={hostel.rating.average} count={hostel.rating.count} className="mt-1" />}
         <p className="mt-1 flex items-center gap-1 text-sm text-muted">
           <MapPin className="size-3.5 shrink-0" aria-hidden />
           <span className="truncate">

@@ -25,6 +25,8 @@ export type HostelCard = {
   roomsAvailable: number;
   verified: boolean;
   demo: boolean;
+  /** Average of visible ratings, or null before anyone has rated. */
+  rating: { average: number; count: number } | null;
   university: { slug: string; shortName: string; name: string } | null;
   cover: Photo | null;
 };
@@ -40,13 +42,14 @@ function toPhoto(m: MediaRow): Photo {
 }
 
 const CARD_SELECT =
-  "id, slug, name, summary, area, city, distance_km, gender_policy, amenities, price_from, rooms_available, is_verified, is_demo, published_at, " +
+  "id, slug, name, summary, area, city, distance_km, gender_policy, amenities, price_from, rooms_available, is_verified, is_demo, published_at, rating_avg, rating_count, " +
   "universities(slug, short_name, name), hostel_media(external_url, storage_path, alt_text, caption, credit, sort_order), room_types(price_amount, price_period, occupancy)";
 
 type CardRow = {
   id: string; slug: string; name: string; summary: string; area: string; city: string;
   distance_km: number | null; gender_policy: Enums<"gender_policy">; amenities: string[];
   price_from: number | null; rooms_available: number; is_verified: boolean; is_demo: boolean;
+  rating_avg: number | null; rating_count: number;
   universities: { slug: string; short_name: string; name: string } | null;
   hostel_media: MediaRow[];
   room_types: { price_amount: number; price_period: Enums<"price_period">; occupancy: number }[];
@@ -70,6 +73,7 @@ function toCard(r: CardRow): HostelCard {
     roomsAvailable: r.rooms_available,
     verified: r.is_verified,
     demo: r.is_demo,
+    rating: r.rating_avg != null && r.rating_count > 0 ? { average: Number(r.rating_avg), count: r.rating_count } : null,
     university: r.universities
       ? { slug: r.universities.slug, shortName: r.universities.short_name, name: r.universities.name }
       : null,

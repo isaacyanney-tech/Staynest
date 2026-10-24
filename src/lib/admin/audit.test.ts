@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest";
 import { changedFields, describeAudit } from "./audit";
 
 describe("describeAudit", () => {
+  it("describes rating moderation", () => {
+    expect(describeAudit({ action: "rating.hidden", entity: "hostel_ratings", details: { reason: "Abusive language" } })).toBe(
+      "Hid a student rating (Abusive language)",
+    );
+    expect(describeAudit({ action: "rating.shown", entity: "hostel_ratings", details: {} })).toBe("Made a hidden rating visible again");
+  });
+
   it("describes moderation and verification", () => {
     expect(describeAudit({ action: "hostel.status_changed", entity: "hostels", details: { from: "pending_review", to: "published" } })).toBe(
       "Moved a listing to published",

@@ -1,9 +1,12 @@
 "use server";
-import { refresh } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 import { z } from "zod";
 import { authorize, AuthorizationError } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formValues, fromZodError, friendlyDbError, type FormState } from "@/lib/forms";
+import { HOSTELS_TAG } from "@/lib/hostels/queries";
+import { RATINGS_TAG } from "@/lib/hostels/ratings";
+import { ratingSchema } from "@/lib/hostels/rating-schema";
 
 const isoDate = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -86,4 +89,48 @@ export async function toggleSaved(hostelId: string, save: boolean): Promise<{ sa
     : await supabase.from("saved_hostels").delete().eq("user_id", viewer.id).eq("hostel_id", id.data);
   if (error) return { saved: !save, error: friendlyDbError(error) };
   return { saved: save };
+}
+
+function ratingChanged(hostelId: string) {
+  // Averages appear on cards everywhere, so every hostel listing is refreshed.
+  updateTag(RATINGS_TAG);
+  updateTag(HOSTELS_TAG);
+  updateTag(`ratings:${hostelId}`);
+  refresh();
+}
+
+export async function saveRating(_prev: FormState, formData: FormData): Promise<FormState> {
+  let viewer;
+  try {
+    viewer = await authorize(["student"]);
+  } catch (e) {
+    if (e instanceof AuthorizationError) return { status: "error", message: "Sign in with a student account to rate a hostel." };
+    throw e;
+  }
+  const parsed = ratingSchema.safeParse({
+    hostelId: formData.get("hostelId"),
+    stars: formData.get("stars"),
+    comment: formData.get("comment") ?? "",
+  });
+  if (!parsed.success) return fromZodError(parsed.error, formData);
+
+  const supabase = await createClient();
+  // The database checks the student had an accepted inspection; a second
+  // submission updates the same row rather than adding another.
+  const { error } = await supabase.from("hostel_ratings").upsert(
+    { hostel_id: parsed.data.hostelId, student_id: viewer.id, stars: parsed.data.stars, comment: parsed.data.comment },
+    { onConflict: "hostel_id,student_id" },
+  );
+  if (error) return { status: "error", message: friendlyDbError(error), values: formValues(formData) };
+  ratingChanged(parsed.data.hostelId);
+  return { status: "success", message: "Thanks. Your rating is live." };
+}
+
+export async function deleteRating(formData: FormData): Promise<void> {
+  const viewer = await authorize(["student"]);
+  const hostelId = z.uuid().parse(formData.get("hostelId"));
+  const supabase = await createClient();
+  const { error } = await supabase.from("hostel_ratings").delete().eq("hostel_id", hostelId).eq("student_id", viewer.id);
+  if (error) throw new Error(friendlyDbError(error));
+  ratingChanged(hostelId);
 }

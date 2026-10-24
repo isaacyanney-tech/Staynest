@@ -4,10 +4,11 @@ import { z } from "zod";
 import { authorize, AuthorizationError, type Viewer } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { HOSTELS_TAG } from "@/lib/hostels/queries";
+import { RATINGS_TAG } from "@/lib/hostels/ratings";
 import { BILLING_TAG } from "@/lib/billing/queries";
 import { CMS_TAG } from "@/lib/cms/queries";
 import { formValues, fromZodError, friendlyDbError, type FormState } from "@/lib/forms";
-import { businessValue, moderationSchema, planFromForm, userAccessSchema, verificationDecisionSchema } from "@/lib/admin/schemas";
+import { businessValue, moderationSchema, ratingModerationSchema, planFromForm, userAccessSchema, verificationDecisionSchema } from "@/lib/admin/schemas";
 
 // Every action re-checks the admin role here; row-level security and the
 // database guards check it again and write the audit log.
@@ -166,4 +167,30 @@ export async function saveBusinessSetting(_prev: FormState, formData: FormData):
   updateTag(BILLING_TAG);
   refresh();
   return { status: "success", message: "Saved." };
+}
+
+// ------------------------------------------------------------------ ratings
+
+export async function moderateRating(_prev: FormState, formData: FormData): Promise<FormState> {
+  if (!(await admin())) return denied;
+  const parsed = ratingModerationSchema.safeParse({
+    ratingId: formData.get("ratingId"),
+    hide: formData.get("hide"),
+    reason: formData.get("reason") ?? "",
+  });
+  if (!parsed.success) return fromZodError(parsed.error, formData);
+  const { ratingId, hide, reason } = parsed.data;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("hostel_ratings")
+    .update({ is_hidden: hide, hidden_reason: hide ? reason : null })
+    .eq("id", ratingId)
+    .select("hostel_id")
+    .maybeSingle();
+  if (error || !data) return { status: "error", message: friendlyDbError(error, "That rating could not be found.") };
+  updateTag(RATINGS_TAG);
+  updateTag(HOSTELS_TAG);
+  updateTag(`ratings:${data.hostel_id}`);
+  refresh();
+  return { status: "success", message: hide ? "Rating hidden. It no longer counts towards the average." : "Rating is visible again." };
 }

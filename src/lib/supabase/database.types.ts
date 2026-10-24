@@ -207,6 +207,60 @@ export type Database = {
           },
         ]
       }
+      hostel_ratings: {
+        Row: {
+          comment: string
+          created_at: string
+          hidden_reason: string | null
+          hostel_id: string
+          id: string
+          is_hidden: boolean
+          reviewer_name: string
+          stars: number
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string
+          created_at?: string
+          hidden_reason?: string | null
+          hostel_id: string
+          id?: string
+          is_hidden?: boolean
+          reviewer_name?: string
+          stars: number
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          hidden_reason?: string | null
+          hostel_id?: string
+          id?: string
+          is_hidden?: boolean
+          reviewer_name?: string
+          stars?: number
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hostel_ratings_hostel_id_fkey"
+            columns: ["hostel_id"]
+            isOneToOne: false
+            referencedRelation: "hostels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_ratings_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hostels: {
         Row: {
           address: string
@@ -226,6 +280,8 @@ export type Database = {
           name: string
           owner_id: string | null
           price_from: number | null
+          rating_avg: number | null
+          rating_count: number
           published_at: string | null
           rooms_available: number
           search: unknown
@@ -253,6 +309,8 @@ export type Database = {
           name: string
           owner_id?: string | null
           price_from?: number | null
+          rating_avg?: number | null
+          rating_count?: number
           published_at?: string | null
           rooms_available?: number
           search?: unknown
@@ -280,6 +338,8 @@ export type Database = {
           name?: string
           owner_id?: string | null
           price_from?: number | null
+          rating_avg?: number | null
+          rating_count?: number
           published_at?: string | null
           rooms_available?: number
           search?: unknown
@@ -1155,6 +1215,7 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      can_rate_hostel: { Args: { p_hostel: string }; Returns: boolean }
       hostel_is_public: { Args: { p_hostel: string }; Returns: boolean }
       finalize_payment: {
         Args: {

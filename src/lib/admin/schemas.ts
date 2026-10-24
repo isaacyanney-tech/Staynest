@@ -212,3 +212,11 @@ export function bannerFromForm(formData: FormData) {
     is_active: formData.get("is_active") === "on",
   });
 }
+
+export const ratingModerationSchema = z
+  .object({
+    ratingId: z.uuid(),
+    hide: z.enum(["true", "false"]).transform((v) => v === "true"),
+    reason: z.string().trim().max(300, "Keep the reason under 300 characters.").default(""),
+  })
+  .refine((v) => !v.hide || v.reason.length > 0, { path: ["reason"], message: "Say why the rating is hidden. The student sees that it was hidden." });

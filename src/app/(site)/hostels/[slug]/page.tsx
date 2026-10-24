@@ -14,6 +14,10 @@ import { RichText } from "@/components/cms/rich-text";
 import { Gallery } from "@/components/hostels/gallery";
 import { InspectionForm } from "@/components/hostels/inspection-form";
 import { SaveButton } from "@/components/hostels/save-button";
+import { getHostelRatings, getRatingEligibility } from "@/lib/hostels/ratings";
+import { RatingBadge, Stars, formatAverage } from "@/components/ratings/stars";
+import { RatingBreakdown, RatingList } from "@/components/ratings/rating-list";
+import { RatingForm } from "@/components/ratings/rating-form";
 
 export async function generateMetadata({ params }: PageProps<"/hostels/[slug]">): Promise<Metadata> {
   const { slug } = await params;
@@ -67,6 +71,11 @@ export default async function HostelPage({ params }: PageProps<"/hostels/[slug]"
               </>
             )}
           </p>
+          {hostel.rating && (
+            <a href="#ratings-heading" className="mt-2 inline-flex rounded-md hover:underline">
+              <RatingBadge average={hostel.rating.average} count={hostel.rating.count} />
+            </a>
+          )}
         </div>
         <Suspense fallback={<Skeleton className="h-10 w-24" />}>
           <SaveSlot hostelId={hostel.id} slug={hostel.slug} />
@@ -161,6 +170,8 @@ export default async function HostelPage({ params }: PageProps<"/hostels/[slug]"
             </section>
           )}
 
+          {!hostel.demo && <RatingsSection hostel={hostel} />}
+
           <p className="text-sm text-muted">Listing updated {formatDate(hostel.updatedAt)}.</p>
         </div>
 
@@ -242,5 +253,56 @@ async function InspectionSlot({ hostel }: { hostel: HostelDetail }) {
       minDate={toIso(today)}
       maxDate={toIso(new Date(today.getTime() + 120 * 864e5))}
     />
+  );
+}
+
+async function RatingsSection({ hostel }: { hostel: HostelDetail }) {
+  const { items, breakdown } = await getHostelRatings(hostel.id);
+  return (
+    <section aria-labelledby="ratings-heading" className="scroll-mt-24">
+      <h2 id="ratings-heading" className="text-2xl font-semibold">
+        Student ratings
+      </h2>
+      <p className="mt-1 text-sm text-muted">Only students whose inspection the owner accepted can rate this hostel.</p>
+      {hostel.rating ? (
+        <div className="mt-5 grid gap-8 rounded-lg border border-line bg-surface p-5 sm:grid-cols-[11rem_1fr] sm:p-6">
+          <div>
+            <p className="font-display text-5xl font-semibold tracking-tight text-brand">{formatAverage(hostel.rating.average)}</p>
+            <Stars value={hostel.rating.average} size={18} className="mt-2" />
+            <p className="mt-1 text-sm text-muted">
+              {hostel.rating.count} {hostel.rating.count === 1 ? "rating" : "ratings"}
+            </p>
+          </div>
+          <RatingBreakdown breakdown={breakdown} />
+        </div>
+      ) : (
+        <p className="mt-4 rounded-lg border border-dashed border-line-strong p-5 text-muted">No ratings yet.</p>
+      )}
+      <Suspense fallback={<Skeleton className="mt-6 h-40" />}>
+        <RateSlot hostel={hostel} />
+      </Suspense>
+      {items.length > 0 && (
+        <div className="mt-8">
+          <RatingList items={items} />
+        </div>
+      )}
+    </section>
+  );
+}
+
+async function RateSlot({ hostel }: { hostel: HostelDetail }) {
+  const viewer = await getViewer();
+  if (!viewer || viewer.role !== "student") return null;
+  const { canRate, mine } = await getRatingEligibility(hostel.id, viewer.id);
+  if (!canRate && !mine) {
+    return <p className="mt-6 text-sm text-muted">Once the owner accepts your inspection request, you can rate this hostel here.</p>;
+  }
+  return (
+    <div className="mt-6 rounded-lg border border-line bg-surface p-5 sm:p-6">
+      <h3 className="font-sans text-base font-semibold tracking-normal">{mine ? "Your rating" : "Rate this hostel"}</h3>
+      <div className="mt-3">
+        <RatingForm hostelId={hostel.id} mine={mine} />
+      </div>
+    </div>
   );
 }
