@@ -449,3 +449,33 @@
 @keyframes rating-bar {
   from { transform: scaleX(0); }
 }
+
+/* Dashboard header band: faint grid and a slow drifting glow. */
+.dashboard-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(120% 90% at 100% 0%, black, transparent 75%);
+}
+.dashboard-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 28rem;
+  height: 28rem;
+  right: -8rem;
+  top: -14rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklab, var(--brand-secondary) 45%, transparent), transparent 65%);
+  filter: blur(10px);
+  animation: dashboard-glow 14s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes dashboard-glow {
+  from { transform: translate(0, 0) scale(1); opacity: 0.55; }
+  to { transform: translate(-6rem, 3rem) scale(1.15); opacity: 0.8; }
+}
+/* Buttons inside the dark band keep their contrast in both modes. */
+.dashboard-actions .bg-surface { background-color: rgb(255 255 255 / 0.08); color: #fff; border-color: rgb(255 255 255 / 0.25); }
+.dashboard-actions .bg-surface:hover { background-color: rgb(255 255 255 / 0.16); }

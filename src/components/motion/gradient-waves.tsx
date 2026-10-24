@@ -14,6 +14,41 @@ const SWELL_SECONDS = 3.2;
 const SWELL_GAIN = 2.8;
 const SWELL_WIDTH = 8;
 const INTRO_SECONDS = 2.6;
+// Frame-time governor. Devices that cannot draw the waves smoothly (no GPU,
+// low-end phones) first get a smaller canvas, then a still picture, so the
+// animation never holds up clicks and page updates.
+const SLOW_FRAME_MS = 45;
+const STILL_FRAME_MS = 120;
+const WARMUP_FRAMES = 2;
+const GOVERNOR_FRAMES = 5;
+const MIN_SCALE = 0.4;
+const SLOW_DEVICE_KEY = "staynest-waves-still";
+
+// Once a device has proved too slow, later pages in the same visit skip the
+// canvas entirely instead of compiling shaders again.
+function knownSlowDevice() {
+  try {
+    return sessionStorage.getItem(SLOW_DEVICE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+// Browsers without a usable GPU draw WebGL on the CPU, where every frame of
+// the waves blocks the page for hundreds of milliseconds.
+function softwareRenderer(gl: WebGL2RenderingContext) {
+  const info = gl.getExtension("WEBGL_debug_renderer_info");
+  const name = String(info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+  return /swiftshader|llvmpipe|softpipe|software|basic render driver/i.test(name);
+}
+
+function rememberSlowDevice() {
+  try {
+    sessionStorage.setItem(SLOW_DEVICE_KEY, "1");
+  } catch {
+    // Storage can be unavailable (private mode); the governor still applies per page.
+  }
+}
 const CAMERA_HEIGHT = 30;
 const QUALITY = { low: 56, medium: 84, high: 120 };
 
@@ -430,7 +465,7 @@ export function GradientWaves({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return undefined;
+    if (!container || knownSlowDevice()) return undefined;
     const canvas = document.createElement("canvas");
     canvas.className = CANVAS;
     container.appendChild(canvas);
@@ -441,9 +476,14 @@ export function GradientWaves({
       stencil: false,
       premultipliedAlpha: true,
       powerPreference: "high-performance",
+      // No context when the browser would draw in software (no usable GPU):
+      // the section's own gradient shows instead of a canvas that would
+      // block the page.
+      failIfMajorPerformanceCaveat: true,
     });
-    if (!gl) {
+    if (!gl || softwareRenderer(gl)) {
       canvas.remove();
+      if (gl) rememberSlowDevice();
       return undefined;
     }
     const vertex = compile(gl, gl.VERTEX_SHADER, VERTEX);
@@ -518,6 +558,10 @@ export function GradientWaves({
       time: 0,
       clock: 0,
       last: 0,
+      scale: 1,
+      slow: false,
+      frames: 0,
+      frameMs: 0,
       raf: 0,
       visible: false,
       introAt: -1,
@@ -532,7 +576,7 @@ export function GradientWaves({
 
     const fit = () => {
       const s = settingsRef.current;
-      const ratio = Math.min(window.devicePixelRatio || 1, s.dpr);
+      const ratio = Math.min(window.devicePixelRatio || 1, s.dpr) * state.scale;
       const width = Math.max(1, Math.round(state.cssWidth * ratio));
       const height = Math.max(1, Math.round(state.cssHeight * ratio));
       if (width === state.width && height === state.height) return;
@@ -551,7 +595,7 @@ export function GradientWaves({
     };
 
     const introProgress = (s: Settings, reduced: boolean) => {
-      if (!s.intro || reduced || state.introAt < 0) return 1;
+      if (!s.intro || reduced || state.slow || state.introAt < 0) return 1;
       return clamp((state.clock - state.introAt) / INTRO_SECONDS, 0, 1);
     };
 
@@ -619,9 +663,26 @@ export function GradientWaves({
       state.raf = 0;
       if (!state.visible || document.hidden) return;
       const s = settingsRef.current;
-      const dt = state.last ? Math.min((now - state.last) / 1000, 0.1) : 0;
+      const interval = state.last ? now - state.last : 0;
+      const dt = Math.min(interval / 1000, 0.1);
       state.last = now;
-      const reduced = prefersReduced();
+      // The first frames include shader compilation, so they are not counted.
+      if (interval > 0 && !state.slow && ++state.frames > WARMUP_FRAMES) {
+        state.frameMs += interval;
+        const measured = state.frames - WARMUP_FRAMES;
+        if (measured >= GOVERNOR_FRAMES) {
+          const average = state.frameMs / measured;
+          if (average > STILL_FRAME_MS || (average > SLOW_FRAME_MS && state.scale <= MIN_SCALE)) {
+            state.slow = true;
+            rememberSlowDevice();
+          }
+          else if (average > SLOW_FRAME_MS) state.scale = Math.max(MIN_SCALE, state.scale * 0.6);
+          state.frames = 0;
+          state.frameMs = 0;
+        }
+      }
+      // A still picture behaves like reduced motion from here on.
+      const reduced = prefersReduced() || state.slow;
       state.clock += dt;
       if (state.introAt < 0) state.introAt = state.clock;
       if (!s.paused && !reduced) state.time += dt * s.speed;
@@ -677,7 +738,7 @@ export function GradientWaves({
       const was = state.inside;
       state.inside = point.inside;
       if (point.inside) state.pointer = [point.x, point.y];
-      if ((point.inside || was) && settingsRef.current.mouseInteraction) wake();
+      if ((point.inside || was) && settingsRef.current.mouseInteraction && !state.slow) wake();
     };
 
     const onLeave = () => {
@@ -687,7 +748,7 @@ export function GradientWaves({
 
     const onDown = (event: PointerEvent) => {
       const s = settingsRef.current;
-      if (!s.swellOnClick || event.button !== 0 || prefersReduced()) return;
+      if (!s.swellOnClick || event.button !== 0 || prefersReduced() || state.slow) return;
       if (event.target instanceof Element && event.target.closest('a, button, input, textarea, select, label, [role="button"]'))
         return;
       const point = local(event);

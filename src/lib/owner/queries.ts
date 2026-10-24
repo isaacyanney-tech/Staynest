@@ -8,14 +8,14 @@ import type { Enums, Tables } from "@/lib/supabase/database.types";
 
 export type OwnerHostelSummary = Pick<
   Tables<"hostels">,
-  "id" | "slug" | "name" | "status" | "is_verified" | "updated_at" | "rooms_available" | "price_from" | "moderation_note"
+  "id" | "slug" | "name" | "status" | "is_verified" | "updated_at" | "rooms_available" | "price_from" | "moderation_note" | "rating_avg" | "rating_count"
 > & { photoCount: number; roomCount: number };
 
 export async function getOwnerHostels(ownerId: string): Promise<OwnerHostelSummary[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("hostels")
-    .select("id, slug, name, status, is_verified, updated_at, rooms_available, price_from, moderation_note, hostel_media(count), room_types(count)")
+    .select("id, slug, name, status, is_verified, updated_at, rooms_available, price_from, moderation_note, rating_avg, rating_count, hostel_media(count), room_types(count)")
     .eq("owner_id", ownerId)
     .order("updated_at", { ascending: false });
   return (data ?? []).map(({ hostel_media, room_types, ...h }) => ({
