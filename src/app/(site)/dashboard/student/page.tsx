@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/states";
 import { DashboardHeader, DashboardSkeleton, STATUS_LABEL, STATUS_TONE } from "@/components/dashboard/shell";
+import { PendingButton } from "@/components/ui/submit-button";
 
 export const metadata: Metadata = { title: "Your dashboard", robots: { index: false } };
 
@@ -39,7 +40,8 @@ async function StudentDashboard() {
       .from("saved_hostels")
       .select("created_at, hostels(id, slug, name, area, price_from, status)")
       .eq("user_id", viewer.id)
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .limit(100),
   ]);
 
   return (
@@ -95,9 +97,9 @@ async function StudentDashboard() {
                   {open && (
                     <form action={cancelInspection}>
                       <input type="hidden" name="id" value={r.id} />
-                      <button type="submit" className="text-sm font-medium text-danger hover:underline">
+                      <PendingButton className="text-sm font-medium text-danger hover:underline">
                         Cancel request
-                      </button>
+                      </PendingButton>
                     </form>
                   )}
                 </li>

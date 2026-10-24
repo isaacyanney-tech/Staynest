@@ -13,6 +13,7 @@ import { DashboardSkeleton } from "@/components/dashboard/shell";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { PageDetailsForm } from "@/components/admin/page-details-form";
 import { PAGE_NAME, publicPath, SECTION_STATE } from "@/components/admin/content-status";
+import { PendingButton } from "@/components/ui/submit-button";
 
 export const metadata: Metadata = { title: "Edit page · Admin", robots: { index: false, follow: false } };
 
@@ -109,8 +110,7 @@ async function Editor({ params }: Pick<PageProps<"/admin/content/[slug]">, "para
 
 function ArrangeButton({ op, label, disabled, children }: { op: string; label: string; disabled?: boolean; children: React.ReactNode }) {
   return (
-    <button
-      type="submit"
+    <PendingButton
       name="op"
       value={op}
       aria-label={label}
@@ -119,6 +119,6 @@ function ArrangeButton({ op, label, disabled, children }: { op: string; label: s
       className="inline-flex size-9 items-center justify-center rounded-md border border-line text-ink/75 hover:border-brand hover:text-brand disabled:pointer-events-none disabled:opacity-40"
     >
       {children}
-    </button>
+    </PendingButton>
   );
 }

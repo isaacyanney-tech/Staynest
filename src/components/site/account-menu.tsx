@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, LogOut } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
 import { cn } from "@/lib/cn";
+import { PendingButton } from "@/components/ui/submit-button";
 
 export type AccountLink = { href: string; label: string };
 
@@ -91,10 +92,10 @@ export function AccountActions({ links, stacked = false }: { links: AccountLink[
       ))}
       <li className={stacked ? "" : "mt-1 border-t border-line pt-1"}>
         <form action={signOut}>
-          <button type="submit" className={cn(item, "text-danger", !stacked && "hover:bg-danger-soft")}>
+          <PendingButton className={cn(item, "text-danger", !stacked && "hover:bg-danger-soft")}>
             <LogOut className="size-4" aria-hidden />
             Sign out
-          </button>
+          </PendingButton>
         </form>
       </li>
     </ul>

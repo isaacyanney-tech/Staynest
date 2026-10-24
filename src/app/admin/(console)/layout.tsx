@@ -6,6 +6,7 @@ import { signOut } from "@/lib/actions/auth";
 import { Wordmark } from "@/components/site/logo";
 import { AdminNav, AdminNavList } from "@/components/admin/admin-nav";
 import { ColorModeToggle } from "@/components/site/color-mode-toggle";
+import { PendingButton } from "@/components/ui/submit-button";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -26,10 +27,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <ExternalLink className="size-4 sm:size-3.5" aria-hidden />
             </Link>
             <form action={signOut}>
-              <button type="submit" className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium text-ink/75 hover:bg-sunken hover:text-ink">
+              <PendingButton className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium text-ink/75 hover:bg-sunken hover:text-ink">
                 <LogOut className="size-4" aria-hidden />
                 <span className="sr-only sm:not-sr-only">Sign out</span>
-              </button>
+              </PendingButton>
             </form>
           </div>
         </div>

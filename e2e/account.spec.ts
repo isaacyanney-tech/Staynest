@@ -22,6 +22,10 @@ test.describe("signed-in account", () => {
     await screenshot(page, `account-menu-${info.project.name}`);
 
     await header.getByRole("button", { name: "Sign out" }).click();
+    // The page was already "/", so wait for the signed-in menu to go rather
+    // than for the address to change. The first sign-out after a cold start
+    // can take longer than the default wait.
+    await expect(header.getByRole("button", { name: /account menu$/ })).toHaveCount(0, { timeout: 15_000 });
     await expect(page).toHaveURL(/\/$/);
     if (isMobile) await header.getByRole("button", { name: "Open menu" }).click();
     await expect(header.getByRole("link", { name: "Sign in" })).toBeVisible();

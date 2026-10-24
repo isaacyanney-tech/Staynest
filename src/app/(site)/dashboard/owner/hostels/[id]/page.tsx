@@ -9,7 +9,7 @@ import { getOwnerHostel, getOwnerPlan, type OwnerHostel } from "@/lib/owner/quer
 import { deleteDraft, deletePhoto, deleteRoom, movePhoto, submitForReview, withdrawFromReview } from "@/lib/actions/owner";
 import { formatDate, formatMoney, PERIOD_SHORT } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
-import { Button, LinkButton } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/button";
 import { Notice } from "@/components/ui/states";
 import { DashboardSkeleton } from "@/components/dashboard/shell";
 import { SafeImage } from "@/components/hostels/safe-image";
@@ -18,6 +18,7 @@ import { LISTING_STATUS } from "@/components/owner/listing-status";
 import { PhotoDetailsForm, PhotoUploadForm } from "@/components/owner/photo-forms";
 import { RoomForm } from "@/components/owner/room-form";
 import { VerificationForm } from "@/components/owner/verification-form";
+import { PendingButton, PendingFormButton } from "@/components/ui/submit-button";
 
 export const metadata: Metadata = { title: "Edit listing", robots: { index: false } };
 
@@ -145,9 +146,9 @@ async function Editor({ params, searchParams }: Props) {
                   <form action={deleteRoom}>
                     <input type="hidden" name="hostelId" value={hostel.id} />
                     <input type="hidden" name="roomId" value={room.id} />
-                    <button type="submit" className="text-sm font-medium text-danger hover:underline">
+                    <PendingButton className="text-sm font-medium text-danger hover:underline">
                       Remove {room.name}
-                    </button>
+                    </PendingButton>
                   </form>
                 </div>
               </li>
@@ -194,17 +195,17 @@ async function Editor({ params, searchParams }: Props) {
                         <input type="hidden" name="hostelId" value={hostel.id} />
                         <input type="hidden" name="photoId" value={photo.id} />
                         <input type="hidden" name="direction" value="cover" />
-                        <Button type="submit" size="sm" variant="ghost">
+                        <PendingFormButton size="sm" variant="ghost">
                           Make cover
-                        </Button>
+                        </PendingFormButton>
                       </form>
                     )}
                     <form action={deletePhoto} className="ml-auto">
                       <input type="hidden" name="hostelId" value={hostel.id} />
                       <input type="hidden" name="photoId" value={photo.id} />
-                      <Button type="submit" size="sm" variant="ghost" className="text-danger" aria-label={`Delete photo ${index + 1}`}>
+                      <PendingFormButton size="sm" variant="ghost" className="text-danger" aria-label={`Delete photo ${index + 1}`}>
                         <Trash2 className="size-4" aria-hidden />
-                      </Button>
+                      </PendingFormButton>
                     </form>
                   </div>
                   <details>
@@ -245,9 +246,9 @@ async function Editor({ params, searchParams }: Props) {
           <p className="mt-3 text-sm text-muted">This removes the listing, its rooms and its photos. It cannot be undone.</p>
           <form action={deleteDraft} className="mt-4">
             <input type="hidden" name="hostelId" value={hostel.id} />
-            <Button type="submit" variant="danger">
+            <PendingFormButton variant="danger">
               Delete permanently
-            </Button>
+            </PendingFormButton>
           </form>
         </details>
       )}
@@ -287,9 +288,9 @@ function PhotoAction({
       <input type="hidden" name="hostelId" value={hostelId} />
       <input type="hidden" name="photoId" value={photoId} />
       <input type="hidden" name="direction" value={direction} />
-      <Button type="submit" size="sm" variant="ghost" disabled={disabled} aria-label={label}>
+      <PendingFormButton size="sm" variant="ghost" disabled={disabled} aria-label={label}>
         {children}
-      </Button>
+      </PendingFormButton>
     </form>
   );
 }
@@ -304,9 +305,9 @@ function StatusPanel({ hostel, checks, ready }: { hostel: OwnerHostel; checks: {
         </div>
         <form action={withdrawFromReview}>
           <input type="hidden" name="hostelId" value={hostel.id} />
-          <Button type="submit" variant="outline" size="sm">
+          <PendingFormButton variant="outline" size="sm">
             Withdraw from review
-          </Button>
+          </PendingFormButton>
         </form>
       </div>
     );
@@ -353,9 +354,9 @@ function StatusPanel({ hostel, checks, ready }: { hostel: OwnerHostel; checks: {
       </ul>
       <form action={submitForReview} className="mt-5">
         <input type="hidden" name="hostelId" value={hostel.id} />
-        <Button type="submit" disabled={!ready}>
+        <PendingFormButton disabled={!ready}>
           Submit for review
-        </Button>
+        </PendingFormButton>
       </form>
     </div>
   );

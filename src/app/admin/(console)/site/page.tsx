@@ -9,6 +9,7 @@ import { Notice } from "@/components/ui/states";
 import { DashboardSkeleton } from "@/components/dashboard/shell";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { BannerForm, NavItemForm, SiteSettingsForms } from "@/components/admin/site-forms";
+import { PendingButton } from "@/components/ui/submit-button";
 
 export const metadata: Metadata = { title: "Site and navigation · Admin", robots: { index: false, follow: false } };
 
@@ -99,9 +100,9 @@ async function Site() {
                 <BannerForm banner={b} />
                 <form action={deleteBanner} className="mt-3 border-t border-line pt-3">
                   <input type="hidden" name="id" value={b.id} />
-                  <button type="submit" className="text-sm font-medium text-danger hover:underline">
+                  <PendingButton className="text-sm font-medium text-danger hover:underline">
                     Delete banner
-                  </button>
+                  </PendingButton>
                 </form>
               </li>
             );
@@ -118,8 +119,7 @@ async function Site() {
 
 function SmallButton({ op, label, disabled, danger, children }: { op: string; label: string; disabled?: boolean; danger?: boolean; children: React.ReactNode }) {
   return (
-    <button
-      type="submit"
+    <PendingButton
       name="op"
       value={op}
       aria-label={label}
@@ -132,6 +132,6 @@ function SmallButton({ op, label, disabled, danger, children }: { op: string; la
       }
     >
       {children}
-    </button>
+    </PendingButton>
   );
 }

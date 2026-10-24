@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { LogOut } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
 import type { Viewer } from "@/lib/auth";
+import { PendingButton } from "@/components/ui/submit-button";
 
 export function DashboardHeader({ viewer, title, children }: { viewer: Viewer; title: string; children?: ReactNode }) {
   const firstName = viewer.fullName.split(" ")[0];
@@ -14,10 +15,10 @@ export function DashboardHeader({ viewer, title, children }: { viewer: Viewer; t
       <div className="flex items-center gap-2">
         {children}
         <form action={signOut}>
-          <button type="submit" className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium text-muted hover:bg-sunken hover:text-ink">
+          <PendingButton className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium text-muted hover:bg-sunken hover:text-ink">
             <LogOut className="size-4" aria-hidden />
             Sign out
-          </button>
+          </PendingButton>
         </form>
       </div>
     </header>
