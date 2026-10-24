@@ -69,13 +69,13 @@ export function InspectionResponse({ id, status, today }: { id: string; status: 
       )}
       <Field
         label="Message to the student"
-        name="response"
+        name="reply"
         idPrefix={prefix}
         optional={decision !== "declined"}
-        error={err.response}
+        error={err.reply}
         hint={decision === "accepted" ? "Say where to meet and who will show them around." : undefined}
       >
-        {(p) => <Textarea {...p} name="response" rows={2} maxLength={1000} className="min-h-16" defaultValue={sent?.response} />}
+        {(p) => <Textarea {...p} name="reply" rows={2} maxLength={1000} className="min-h-16" defaultValue={sent?.reply} />}
       </Field>
       <SubmitButton size="sm" pendingLabel="Sending…">
         Send reply

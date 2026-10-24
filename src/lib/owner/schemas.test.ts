@@ -58,12 +58,12 @@ describe("photo text", () => {
 describe("inspectionResponseSchema", () => {
   const id = "6f1c1f9e-8a51-4d5c-9b6e-0d6f3b9b1a11";
   it("needs a date to reschedule and a reason to decline", () => {
-    expect(inspectionResponseSchema.safeParse({ id, decision: "rescheduled", response: "", proposedDate: "" }).success).toBe(false);
-    expect(inspectionResponseSchema.safeParse({ id, decision: "declined", response: "", proposedDate: "" }).success).toBe(false);
-    expect(inspectionResponseSchema.safeParse({ id, decision: "declined", response: "Fully booked", proposedDate: "" }).success).toBe(true);
-    expect(inspectionResponseSchema.parse({ id, decision: "accepted", response: "", proposedDate: "" }).proposedDate).toBeNull();
+    expect(inspectionResponseSchema.safeParse({ id, decision: "rescheduled", reply: "", proposedDate: "" }).success).toBe(false);
+    expect(inspectionResponseSchema.safeParse({ id, decision: "declined", reply: "", proposedDate: "" }).success).toBe(false);
+    expect(inspectionResponseSchema.safeParse({ id, decision: "declined", reply: "Fully booked", proposedDate: "" }).success).toBe(true);
+    expect(inspectionResponseSchema.parse({ id, decision: "accepted", reply: "", proposedDate: "" }).proposedDate).toBeNull();
   });
   it("only accepts owner decisions", () => {
-    expect(inspectionResponseSchema.safeParse({ id, decision: "cancelled", response: "", proposedDate: "" }).success).toBe(false);
+    expect(inspectionResponseSchema.safeParse({ id, decision: "cancelled", reply: "", proposedDate: "" }).success).toBe(false);
   });
 });
