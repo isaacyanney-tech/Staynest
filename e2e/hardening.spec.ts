@@ -51,7 +51,9 @@ test.describe("hardening", () => {
     await pay(second).click();
     await expect(second).toHaveURL(page.url());
 
-    const transactions: { reference: string; email: string }[] = await (await request.get(`${fakePaystack}/__test/transactions`)).json();
+    const transactions: { reference: string; email: string }[] = await (
+      await request.get(`${fakePaystack}/__test/transactions`)
+    ).json();
     expect(transactions.filter((t) => t.email === checkoutOwner)).toHaveLength(1);
   });
 

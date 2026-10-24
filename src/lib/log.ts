@@ -5,7 +5,8 @@
 type Context = Record<string, string | number | boolean | null | undefined>;
 
 function describe(error: unknown) {
-  if (error instanceof Error) return { name: error.name, message: error.message, stack: error.stack?.split("\n").slice(0, 6).join("\n") };
+  if (error instanceof Error)
+    return { name: error.name, message: error.message, stack: error.stack?.split("\n").slice(0, 6).join("\n") };
   if (error && typeof error === "object") {
     const e = error as { code?: unknown; message?: unknown; details?: unknown };
     return { code: String(e.code ?? ""), message: String(e.message ?? ""), details: e.details ? String(e.details) : undefined };
