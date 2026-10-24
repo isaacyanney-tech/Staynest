@@ -46,6 +46,17 @@ export function homeFor(role: Role): string {
   return "/dashboard/student";
 }
 
+/** Where to send someone after signing in: the requested page if their role may see it, else their home. */
+export function landingFor(role: Role, next: string | null): string {
+  return next && (role === "admin" || !next.startsWith("/admin")) ? next : homeFor(role);
+}
+
+/** For the sign-in and sign-up pages: people who are already signed in go straight on. */
+export async function redirectIfSignedIn(next: string | null) {
+  const viewer = await getViewer();
+  if (viewer) redirect(landingFor(viewer.role, next));
+}
+
 /** For pages: redirects signed-out visitors, and sends wrong roles elsewhere. */
 export async function requireRole(roles: Role[], area: "dashboard" | "admin" = "dashboard"): Promise<Viewer> {
   const viewer = await getViewer();

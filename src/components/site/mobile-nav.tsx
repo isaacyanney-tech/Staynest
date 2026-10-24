@@ -34,9 +34,9 @@ export function MobileNav({ items, account }: { items: Item[]; account: React.Re
       <div
         id={panelId}
         hidden={!open}
-        // Following any link inside the panel closes it.
+        // Following any link or submitting (Sign out) inside the panel closes it.
         onClick={(e) => {
-          if ((e.target as HTMLElement).closest("a")) setOpen(false);
+          if ((e.target as HTMLElement).closest("a, button[type=submit]")) setOpen(false);
         }}
         className="absolute inset-x-0 top-full z-40 border-b border-line bg-surface px-4 pb-6 pt-2 shadow-overlay"
       >
