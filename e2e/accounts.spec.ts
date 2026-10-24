@@ -98,6 +98,10 @@ test.describe("accounts and roles", () => {
     await expect(page).toHaveURL(/\/dashboard\/owner$/);
     await expect(page.getByRole("region", { name: "Listings" }).getByText("Okponglo Test House")).toBeVisible();
     await expect(page.getByText("Ama Mensah").first()).toBeVisible();
+    // The figures in the header link to the work behind them.
+    const reply = page.getByRole("link", { name: "Needs your reply" });
+    await expect(reply).toHaveAttribute("href", "#requests-heading");
+    await expect(page.getByRole("definition").filter({ hasText: /^\d+$/ }).first()).toBeVisible();
     await page.goto("/dashboard/student");
     await expect(page).toHaveURL(/\/dashboard\/owner$/);
   });
