@@ -1,5 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { withDeadline } from "@/lib/with-deadline";
+
+// Netlify kills the edge function after about 30 seconds. When Supabase is
+// unreachable, the auth client keeps retrying a token refresh for longer than
+// that, so the whole site went down with "edge function timed out". The
+// session check now gives up quickly and the request carries on signed out.
+const SESSION_CHECK_MS = 3_000;
 
 // Refreshes the Supabase session cookie on each request and sends signed-out
 // visitors away from private areas. This is an optimistic check only: every
@@ -17,24 +24,27 @@ export async function proxy(request: NextRequest) {
         return request.cookies.getAll();
       },
       setAll(cookiesToSet, headers) {
-        for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
+        for (const { name, value } of cookiesToSet)
+          request.cookies.set(name, value);
         response = NextResponse.next({ request });
-        for (const { name, value, options } of cookiesToSet) response.cookies.set(name, value, options);
-        for (const [k, v] of Object.entries(headers ?? {})) response.headers.set(k, v);
+        for (const { name, value, options } of cookiesToSet)
+          response.cookies.set(name, value, options);
+        for (const [k, v] of Object.entries(headers ?? {}))
+          response.headers.set(k, v);
       },
     },
   });
 
-  let signedIn = false;
-  try {
-    const { data } = await supabase.auth.getClaims();
-    signedIn = Boolean(data?.claims?.sub);
-  } catch {
-    signedIn = false;
-  }
+  const result = await withDeadline(
+    supabase.auth.getClaims(),
+    SESSION_CHECK_MS,
+    null,
+  );
+  const signedIn = Boolean(result?.data?.claims?.sub);
 
   const { pathname, search } = request.nextUrl;
-  const isAdminArea = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
+  const isAdminArea =
+    pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
   const isDashboard = pathname.startsWith("/dashboard");
   if (!signedIn && (isAdminArea || isDashboard)) {
     const target = request.nextUrl.clone();
@@ -46,5 +56,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)",
+  ],
 };
